@@ -141,7 +141,7 @@ add_shortcode('directorio_investigadores', function() {
     @media(max-width:480px){.dir-inv-grid{grid-template-columns:repeat(2,1fr);gap:20px 12px;padding:0 16px}}
     .dir-inv-item{text-align:center;text-decoration:none!important;display:block;padding:12px;border-radius:12px;transition:transform .2s,box-shadow .2s}
     .dir-inv-item:hover{transform:translateY(-4px);box-shadow:0 8px 20px rgba(0,0,0,.08)}
-    .dir-inv-photo{width:170px;height:170px;border-radius:50%;object-fit:cover;margin:0 auto 14px;display:block;filter:grayscale(100%);transition:filter .3s;border:1px solid #e5e5e5}
+    .dir-inv-photo{width:170px!important;height:170px!important;border-radius:50%;object-fit:cover;margin:0 auto 14px;display:block;filter:grayscale(100%);transition:filter .3s;border:1px solid #e5e5e5}
     .dir-inv-item:hover .dir-inv-photo{filter:grayscale(0%)}
     .dir-inv-photo-placeholder{width:170px;height:170px;border-radius:50%;background:#e5e5e5;margin:0 auto 14px}
     .dir-inv-name{color:#1a1a2e!important;font-weight:600;font-size:.95rem;text-decoration:none!important;line-height:1.4;min-height:2.8em;display:flex;align-items:center;justify-content:center;transition:color .2s}

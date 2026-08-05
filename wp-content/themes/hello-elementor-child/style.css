@@ -142,6 +142,9 @@ Version: 1.0
 .site-header .site-navigation .sub-menu{background:#ffffff!important;border-top:2px solid #1a3d63!important;min-width:200px!important;box-shadow:0 4px 12px rgba(0,0,0,0.15)!important;}
 .site-header .site-navigation .sub-menu a{color:#1a3d63!important;font-size:12px!important;padding:10px 15px!important;white-space:normal!important;text-decoration:none!important;display:block!important;width:100%!important;box-sizing:border-box!important;}
 .site-header .site-navigation .sub-menu a:hover{color:#ffffff!important;background:#3d8fb5!important;}
+.site-header .site-navigation .sub-menu a.current-menu-item,
+.site-header .site-navigation .sub-menu li.current-menu-item > a,
+.site-header .site-navigation .sub-menu li.current_page_item > a{color:#ffffff!important;background:#3d8fb5!important;}
 @media(max-width:900px){
 .site-header .site-navigation{display:none!important;}
 .site-header .site-navigation-dropdown{background-color:#ffffff!important;}
@@ -434,6 +437,15 @@ main.category-concejo-academico .single-featured-img {
 /* Espacio antes del footer */
 .page-content {
     padding-bottom: 40px; margin-bottom: 80px;
+    max-width: 100%;
+    overflow-x: hidden;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    box-sizing: border-box;
+}
+.page-content img, .page-content table, .page-content iframe {
+    max-width: 100%;
+    height: auto;
 }
 
 /* Diferenciación visual submenú móvil/tablet - fondo gris suave + indent */
@@ -662,3 +674,57 @@ body .page-content .posg-tab-panel a[href$=".pdf"]{display:inline!important;back
 body .page-content .posg-tab-panel a[href$=".pdf"]:hover{background:none!important;text-decoration:underline!important}
 .posg-tab-panel a{color:#2563eb}
 @media(max-width:768px){.posg-header{flex-direction:column}.posg-tab-btn{font-size:.78rem;padding:5px 8px}}
+
+/* Fix: contenido de Elementor se desbordaba en landscape/tablet en paginas con builder activo (Consejo Academico, Directorio, Normativa interna) */
+html, body {
+    overflow-x: hidden;
+    max-width: 100%;
+}
+.elementor, .elementor-section, .elementor-container, .elementor-widget-wrap, .elementor-element {
+    max-width: 100%;
+}
+@media (max-width: 1024px) {
+    .elementor-section {
+        overflow-x: hidden;
+    }
+}
+
+/* Fix: contenedores Elementor (e-con-boxed) se desbordaban en landscape/tablet en paginas con builder activo (Consejo Academico, Directorio, Normativa interna) */
+.elementor .e-con, .elementor .e-con-boxed, .elementor .e-con-inner {
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+}
+}
+.elementor .elementor-widget-wrap, .elementor .elementor-widget {
+    max-width: 100% !important;
+    overflow-wrap: break-word !important;
+}
+@media (max-width: 1024px) {
+    .elementor-element {
+        max-width: 100% !important;
+    }
+}
+
+/* Fix: texto largo de botones Elementor forzaba white-space:nowrap y desbordaba la pagina completa */
+.elementor-button, .elementor-button-content-wrapper, .elementor-button-text {
+    white-space: normal !important;
+    word-wrap: break-word !important;
+    max-width: 100% !important;
+    height: auto !important;
+}
+
+/* Boton simple para paginas de contenido normal (reemplaza botones Elementor con problemas de alineacion) */
+.page-content a.simple-btn {
+    display: inline-block;
+    background-color: #6998b6;
+    color: #ffffff !important;
+    padding: 12px 24px;
+    margin: 8px 0;
+    border-radius: 4px;
+    text-decoration: none !important;
+    font-weight: 600;
+    transition: background-color 0.2s ease;
+}
+.page-content a.simple-btn:hover {
+    background-color: #5a86a0;
+}
