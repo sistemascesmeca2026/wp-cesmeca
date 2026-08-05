@@ -1,0 +1,565 @@
+<?php
+function inicio_page_shortcode() {
+    ob_start();
+    
+    
+    // Posts recientes por categoría
+    $agenda = get_posts(['category_name' => 'agenda-cultural', 'numberposts' => 6, 'post_status' => 'publish']);
+    $notas  = get_posts(['category_name' => 'notas-informativas', 'numberposts' => 6, 'post_status' => 'publish']);
+    $libros = get_posts(['category_name' => 'publicaciones', 'numberposts' => 20, 'post_status' => 'publish', 'meta_key' => '_thumbnail_id']);
+    $convoc = get_posts(['category_name' => 'convocatorias-y-comunicados', 'numberposts' => 1, 'post_status' => 'publish']);
+    ?>
+
+<style>
+/* ===== RESET & BASE ===== */
+.home-wrap{max-width:100%;overflow-x:hidden;font-family:inherit}
+.home-section{padding:48px 24px;max-width:1400px;margin:0 auto}
+.home-section-title{font-size:1.2rem;font-weight:700;color:#1a1a2e;text-transform:uppercase;letter-spacing:1px;margin-bottom:24px;display:flex;align-items:center;gap:10px}
+.home-section-title::after{content:'';flex:1;height:2px;background:#2563eb;margin-left:8px}
+.home-section-title span{color:#2563eb}
+
+/* ===== HERO SLIDER ===== */
+
+/* ===== VIDEO ===== */
+
+/* ===== AGENDA GRID ===== */
+.agenda-slider-outer{position:relative}
+.agenda-slider-wrap{overflow:hidden;border-radius:8px;margin:0 44px}
+.agenda-slider-track{display:flex;gap:16px;transition:transform .5s ease;align-items:stretch}
+.agenda-card{width:calc(33.333% - 11px);min-width:calc(33.333% - 11px);max-width:calc(33.333% - 11px);flex-shrink:0;flex-grow:0;background:#fff;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,.08);overflow:hidden;box-sizing:border-box}
+.agenda-card-img{height:160px;overflow:hidden}
+.agenda-card-img img{width:100%;height:100%;object-fit:cover}
+.agenda-card-img-placeholder{width:100%;height:160px;background:#1a3a4a;display:flex;align-items:center;justify-content:center;color:#fff;font-size:.78rem;text-align:center;padding:10px}
+.agenda-nav{position:absolute;top:50%;transform:translateY(-50%);background:#1a3a4a;color:#fff;border:none;border-radius:50%;width:36px;height:36px;font-size:1.4rem;cursor:pointer;z-index:5;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,.3)}
+.agenda-nav:hover{background:#2563eb}
+.agenda-nav.prev{left:0}
+.agenda-nav.next{right:0}
+.agenda-card{background:#fff;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,.08);overflow:hidden;transition:transform .2s}
+.agenda-card:hover{transform:translateY(-3px)}
+.agenda-card-img{height:180px;overflow:hidden}
+.agenda-card-img img{width:100%;height:100%;object-fit:cover}
+.agenda-card-img-placeholder{width:100%;height:180px;background:#1a3a4a;display:flex;align-items:center;justify-content:center;color:#fff;font-size:.85rem;text-align:center;padding:10px}
+.agenda-card-body{padding:14px}
+.agenda-card-date{font-size:.8rem;color:#2563eb;margin-bottom:6px}
+.agenda-card-title{font-size:.92rem;font-weight:600;color:#1a1a2e;line-height:1.4;margin-bottom:10px}
+.agenda-card-cat{font-size:.78rem;color:#888}
+.agenda-card-btn{display:inline-block;background:#2563eb;color:#fff !important;font-size:.8rem;padding:6px 14px;border-radius:4px;text-decoration:none;margin-top:10px}
+.agenda-card-btn:hover{background:#1d4ed8}
+
+/* ===== NOTAS ===== */
+.notas-slider-outer{position:relative}
+.notas-slider-wrap{overflow:hidden;margin:0 44px}
+.notas-slider-track{display:flex;gap:16px;transition:transform .5s ease}
+.nota-card{min-width:calc(33.333% - 11px);max-width:calc(33.333% - 11px);flex-shrink:0;background:#fff;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,.08);overflow:hidden;box-sizing:border-box}
+.notas-nav{position:absolute;top:40%;transform:translateY(-50%);background:#1a3a4a;color:#fff;border:none;border-radius:50%;width:36px;height:36px;font-size:1.4rem;cursor:pointer;z-index:10;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,.3)}
+.notas-nav:hover{background:#2563eb}
+.notas-nav.prev{left:0}.notas-nav.next{right:0}
+.nota-card{background:#fff;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,.08);overflow:hidden}
+.nota-card-img{height:200px;overflow:hidden}
+.nota-card-img img{width:100%;height:100%;object-fit:cover}
+.nota-card-body{padding:16px}
+.nota-card-title{font-size:.95rem;font-weight:700;color:#1a1a2e;text-transform:uppercase;line-height:1.4;margin-bottom:8px}
+.nota-card-meta{font-size:.78rem;color:#888;margin-bottom:8px}
+.nota-card-excerpt{font-size:.88rem;color:#555;line-height:1.6}
+.nota-card-btn{display:inline-block;border:1px solid #ccc;color:#333 !important;font-size:.8rem;padding:5px 12px;border-radius:4px;text-decoration:none;margin-top:10px}
+
+/* ===== PUBLICACIONES SLIDER ===== */
+.pub-grid-2col{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:start}
+.pub-slider-outer{position:relative}
+.pub-slider-wrap{overflow:hidden;margin:0 40px}
+.pub-slider{display:flex;gap:12px;transition:transform .5s ease;padding:8px 0;align-items:flex-start}
+.pub-card{min-width:calc(33.33% - 9px);max-width:calc(33.33% - 9px);text-align:center;flex-shrink:0}
+.pub-card img{width:130px;height:185px;object-fit:cover;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,.15);transition:transform .2s}
+.pub-card:hover img{transform:scale(1.05)}
+.pub-nav{display:none}
+.pub-dots{display:flex;justify-content:center;gap:6px;margin-top:14px}
+.pub-dot{width:24px;height:4px;border-radius:2px;background:#ddd;border:none;cursor:pointer;padding:0;transition:background .3s}
+.pub-dot.active{background:#1a3a4a}
+
+/* ===== POSGRADOS BUTTONS ===== */
+.posgrado-btns{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:32px 0}
+.posg-btn{display:flex;align-items:center;gap:12px;padding:16px;border-radius:8px;text-decoration:none;color:#fff !important;font-weight:600;font-size:.9rem;line-height:1.3;transition:opacity .2s}
+.posg-btn:hover{opacity:.9}
+.posg-btn-mcsh{background:#1a56db}
+.posg-btn-dcsh{background:#c0392b}
+.posg-btn-meif{background:#7b2d8b}
+.posg-btn-deif{background:#27ae60}
+.posg-btn img{width:40px;height:40px;border-radius:50%;border:2px solid rgba(255,255,255,.4)}
+
+/* ===== REPOSITORIO BANNER ===== */
+.repo-banner{display:block;width:100%;max-width:900px;margin:0 auto;border-radius:8px;overflow:hidden}
+.repo-banner img{width:100%;display:block}
+
+/* ===== REDES SOCIALES ===== */
+.redes-section{text-align:center;padding:32px 24px;background:#f8f9fa}
+.redes-section p{font-size:.95rem;color:#555;margin-bottom:16px}
+.redes-icons{display:flex;justify-content:center;gap:24px}
+.redes-icons a{color:#1a1a2e;font-size:1.8rem;text-decoration:none;transition:color .2s}
+.redes-icons a:hover{color:#2563eb}
+
+.convoc-btn{background:#2563eb;color:#fff;padding:12px 28px;border-radius:6px;font-weight:700;text-decoration:none;font-size:1rem}
+@media(max-width:768px){.convoc-btn{padding:8px 16px;font-size:.85rem}}
+/* ===== FACEBOOK EMBED ===== */
+.fb-wrap{overflow:hidden;border-radius:8px}.fb-wrap iframe{margin-top:-10px;height:500px!important;border-radius:8px}
+.social-grid{display:grid;grid-template-columns:1fr 1fr;gap:32px;max-width:1400px;margin:0 auto;padding:0 24px 48px}
+.social-col h3{font-size:1.1rem;font-weight:700;color:#1a1a2e;text-transform:uppercase;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.social-col h3 span{color:#2563eb}
+.yt-slider-wrap{position:relative;overflow:hidden;width:100%;border-radius:8px;min-height:500px}
+.yt-slider-track{display:flex;transition:transform .4s ease;width:100%}
+.yt-slide{min-width:100%;width:100%;flex-shrink:0;cursor:pointer;border-radius:8px;overflow:hidden;background:#000;position:relative;aspect-ratio:16/9;height:auto}
+.yt-slide img{width:100%;height:100%;object-fit:cover;display:block;opacity:.85;transition:opacity .2s;position:absolute;inset:0}
+.yt-slide:hover img{opacity:1}
+.yt-slide-overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:space-between}
+.yt-play-btn{width:56px;height:56px;background:rgba(255,0,0,.85);border-radius:50%;display:flex;align-items:center;justify-content:center}
+.yt-play-btn svg{fill:#fff;width:24px;height:24px;margin-left:4px}
+.yt-slide-title{color:#fff;font-size:.85rem;font-weight:600;text-align:center;padding:0 16px;text-shadow:0 1px 3px rgba(0,0,0,.8);line-height:1.3}
+.yt-channel-bar{width:100%;background:rgba(0,0,0,.8);padding:20px 16px;color:#fff;font-weight:700;font-size:.95rem}
+.yt-title-bar{width:100%;background:rgba(0,0,0,.75);padding:20px 16px;color:#fff;font-size:.82rem;text-align:center;line-height:1.4}
+.yt-nav{position:absolute;top:50%;transform:translateY(-50%);background:rgba(0,0,0,.6);color:#fff;border:none;border-radius:50%;width:36px;height:36px;font-size:1.2rem;cursor:pointer;z-index:5;display:flex;align-items:center;justify-content:center}
+.yt-nav:hover{background:rgba(255,0,0,.8)}
+.yt-nav.prev{left:8px}.yt-nav.next{right:8px}
+.yt-dots{display:none;justify-content:center;gap:6px;margin-top:10px}
+.yt-dot{width:8px;height:8px;border-radius:50%;background:#ccc;border:none;cursor:pointer;padding:0}
+.yt-dot.active{background:#ff0000}
+
+
+
+
+@media(min-width:1025px){.yt-slide{height:500px;aspect-ratio:unset}}
+@media(max-width:1024px) and (orientation:portrait){
+  .pub-grid-2col{grid-template-columns:1fr !important;gap:40px !important}
+}
+@media(max-width:768px){
+  .pub-grid-2col{grid-template-columns:1fr !important;gap:32px !important}
+}
+@media(max-width:1024px){
+  .social-grid{grid-template-columns:1fr}
+  .yt-slider-wrap{min-height:unset !important;aspect-ratio:16/9}
+  .agenda-card{min-width:calc(50% - 8px);max-width:calc(50% - 8px)}
+  .nota-card{min-width:calc(50% - 8px);max-width:calc(50% - 8px)}
+  .pub-card{min-width:calc(50% - 8px);max-width:calc(50% - 8px)}
+  .posgrado-btns{grid-template-columns:1fr 1fr}
+  .pub-grid-2col{grid-template-columns:1fr;gap:32px}
+}
+@media(max-width:768px){
+  .social-grid{padding:0 4px 16px !important}
+  .social-col{overflow:hidden;max-width:100%}
+  .fb-wrap{height:420px !important;width:100% !important}
+  .fb-wrap iframe{height:430px !important;width:100% !important;max-width:100% !important}
+  .agenda-card{min-width:100%;max-width:100%}
+  .nota-card{min-width:100%;max-width:100%}
+  .pub-card{min-width:calc(50% - 6px);max-width:calc(50% - 6px)}
+  .posgrado-btns{grid-template-columns:1fr 1fr}
+  .social-grid{grid-template-columns:1fr}.yt-slider-wrap{min-height:unset !important;aspect-ratio:16/9}
+  .pub-grid-2col{grid-template-columns:1fr;gap:24px}
+  .agenda-slider-outer,.notas-slider-outer{padding:0 32px}
+}
+@media(max-width:480px){
+  .agenda-card{min-width:100%;max-width:100%}
+  .nota-card{min-width:100%;max-width:100%}
+  .pub-card{min-width:calc(50% - 6px);max-width:calc(50% - 6px)}
+  .posgrado-btns{grid-template-columns:1fr}
+  .home-section{padding:32px 16px}
+  .pub-grid-2col{grid-template-columns:1fr;gap:20px}
+}
+</style>
+
+<div class="home-wrap">
+
+<!-- AGENDA ACADÉMICA -->
+<div class="home-section">
+  <div class="home-section-title">📅 <span>Agenda</span> Académica</div>
+  <div class="agenda-slider-outer">
+    <button class="agenda-nav prev" onclick="agendaNav(-1)">&#8249;</button>
+    <div class="agenda-slider-wrap">
+    <div class="agenda-slider-track" id="agendaTrack">
+    <?php foreach($agenda as $post): setup_postdata($post);
+      $thumb = get_the_post_thumbnail_url($post->ID, 'medium');
+      $cats = get_the_category($post->ID);
+      $cat_name = $cats ? $cats[0]->name : '';
+    ?>
+    <div class="agenda-card">
+      <?php if($thumb): ?>
+        <div class="agenda-card-img"><img src="<?php echo esc_url($thumb); ?>" alt=""></div>
+      <?php else: ?>
+        <div class="agenda-card-img-placeholder"><?php echo esc_html($post->post_title); ?></div>
+      <?php endif; ?>
+      <div class="agenda-card-body">
+        <div class="agenda-card-date"><?php echo get_the_date('d \d\e F \d\e Y', $post); ?></div>
+        <div class="agenda-card-title"><?php echo esc_html($post->post_title); ?></div>
+        <div class="agenda-card-cat">📌 <?php echo esc_html($cat_name); ?></div>
+        <a href="<?php echo get_permalink($post->ID); ?>" class="agenda-card-btn">Read More</a>
+      </div>
+    </div>
+    <?php endforeach; wp_reset_postdata(); ?>
+    </div>
+    </div>
+    <button class="agenda-nav next" onclick="agendaNav(1)">&#8250;</button>
+  </div>
+</div>
+
+<!-- NOTAS INFORMATIVAS -->
+<div style="background:#f8f9fa;padding:1px 0">
+<div class="home-section">
+  <div class="home-section-title">📰 <span>NOTAS</span> INFORMATIVAS</div>
+  <div class="notas-slider-outer">
+    <button class="notas-nav prev" onclick="notasNav(-1)">&#8249;</button>
+    <div class="notas-slider-wrap">
+    <div class="notas-slider-track" id="notasTrack">
+    <?php foreach($notas as $post): setup_postdata($post);
+      $thumb = get_the_post_thumbnail_url($post->ID, 'medium');
+    ?>
+    <div class="nota-card">
+      <?php if($thumb): ?>
+        <div class="nota-card-img"><img src="<?php echo esc_url($thumb); ?>" alt=""></div>
+      <?php endif; ?>
+      <div class="nota-card-body">
+        <div class="nota-card-title"><?php echo esc_html($post->post_title); ?></div>
+        <div class="nota-card-meta">👤 difusion cesmeca &nbsp; 📅 <?php echo get_the_date('d M Y', $post); ?></div>
+        <div class="nota-card-excerpt"><?php echo wp_trim_words($post->post_content, 20); ?></div>
+        <a href="<?php echo get_permalink($post->ID); ?>" class="nota-card-btn">View Details</a>
+      </div>
+    </div>
+    <?php endforeach; wp_reset_postdata(); ?>
+    </div>
+    </div>
+    <button class="notas-nav next" onclick="notasNav(1)">&#8250;</button>
+  </div>
+</div>
+</div>
+
+<!-- PUBLICACIONES -->
+<div class="home-section">
+  <div class="pub-grid-2col">
+
+    <!-- Libros -->
+    <div>
+      <div class="home-section-title">📚 <span>PUBLICACIONES</span></div>
+      <div style="overflow:hidden">
+        <div class="pub-slider" id="pub-libros">
+          <?php foreach($libros as $post):
+            $thumb = get_the_post_thumbnail_url($post->ID, 'medium');
+            if(!$thumb) continue;
+          ?>
+          <div class="pub-card">
+            <a href="<?php echo get_permalink($post->ID); ?>">
+              <img src="<?php echo esc_url($thumb); ?>" alt="<?php echo esc_attr($post->post_title); ?>">
+            </a>
+          </div>
+          <?php endforeach; wp_reset_postdata(); ?>
+        </div>
+      </div>
+      <div class="pub-dots" id="dots-libros"></div>
+    </div>
+
+    <!-- Revistas LiminaR -->
+    <div>
+      <div class="home-section-title">📖 <span>PUBLICACIONES</span> DE REVISTAS</div>
+      <?php
+      $liminar_covers = get_transient('cesmeca_liminar_covers');
+      if(false === $liminar_covers) {
+          $liminar_covers = [];
+          $html = @file_get_contents('https://liminar.cesmeca.mx/index.php/r1/issue/archive');
+          if($html) {
+              preg_match_all('/src="(https:\/\/liminar\.cesmeca\.mx\/public\/journals\/1\/cover_issue_[^"]+)"/', $html, $matches);
+              if(!empty($matches[1])) {
+                  $liminar_covers = array_slice(array_unique($matches[1]), 0, 6);
+              }
+          }
+          if(!empty($liminar_covers)) {
+              set_transient('cesmeca_liminar_covers', $liminar_covers, 12 * HOUR_IN_SECONDS);
+          } else {
+              $liminar_covers = [
+                  'https://liminar.cesmeca.mx/public/journals/1/cover_issue_52_es_ES.png',
+                  'https://liminar.cesmeca.mx/public/journals/1/cover_issue_51_es_ES.jpg',
+                  'https://liminar.cesmeca.mx/public/journals/1/cover_issue_50_es_ES.jpg',
+                  'https://liminar.cesmeca.mx/public/journals/1/cover_issue_49_es_ES.png',
+              ];
+          }
+      }
+      ?>
+      <div style="overflow:hidden">
+        <div class="pub-slider" id="pub-revistas">
+          <?php foreach($liminar_covers as $cover): ?>
+          <div class="pub-card">
+            <a href="https://liminar.cesmeca.mx/" target="_blank">
+              <img src="<?php echo esc_url($cover); ?>" alt="LiminaR">
+            </a>
+          </div>
+          <?php endforeach; ?>
+        </div>
+      </div>
+      <div class="pub-dots" id="dots-revistas"></div>
+      <p style="text-align:center;margin-top:16px">
+        <a href="https://liminar.cesmeca.mx/" target="_blank" style="color:#2563eb;font-size:.9rem">Ver todos los números →</a>
+      </p>
+    </div>
+
+  </div>
+</div>
+
+<!-- POSGRADOS -->
+<div style="background:#f8f9fa;padding:32px 24px">
+<div style="max-width:1400px;margin:0 auto">
+  <div class="home-section-title">🎓 <span>RETRIBUCIÓN</span> SOCIAL</div>
+  <div class="posgrado-btns">
+    <a href="https://joomla.clickwebhoover.online/ret-social-mcsh/" class="posg-btn posg-btn-mcsh">
+      <img src="https://cesmeca.mx/images/actualizacion_2025/JesusM.png" alt="">
+      Maestría en Ciencias Sociales y Humanísticas
+    </a>
+    <a href="https://joomla.clickwebhoover.online/ret-social-dcsh/" class="posg-btn posg-btn-dcsh">
+      <img src="https://cesmeca.mx/images/actualizacion_2025/JesusM.png" alt="">
+      Doctorado en Ciencias Sociales y Humanísticas
+    </a>
+    <a href="https://joomla.clickwebhoover.online/ret-social-meif/" class="posg-btn posg-btn-meif">
+      <img src="https://cesmeca.mx/images/actualizacion_2025/JesusM.png" alt="">
+      Maestría en Estudios e Intervención Feministas
+    </a>
+    <a href="https://joomla.clickwebhoover.online/ret-social-deif/" class="posg-btn posg-btn-deif">
+      <img src="https://cesmeca.mx/images/actualizacion_2025/JesusM.png" alt="">
+      Doctorado en Estudios e Intervención Feministas
+    </a>
+  </div>
+</div>
+</div>
+
+<!-- CONVOCATORIAS -->
+<div style="padding:32px 24px">
+<div style="max-width:1400px;margin:0 auto">
+  <div class="home-section-title">📢 <span>CONVOCATORIAS</span> Y COMUNICADOS</div>
+  <div style="position:relative;border-radius:12px;overflow:hidden;max-height:350px">
+    <img src="https://joomla.clickwebhoover.online/wp-content/uploads/2024/05/banner_avisos.png" alt="Convocatorias y comunicados" style="width:100%;object-fit:cover;display:block">
+    <div style="position:absolute;inset:0;display:flex;align-items:flex-end;justify-content:flex-end;padding:20px">
+      <a href="https://joomla.clickwebhoover.online/category/avisos-y-comunicados/" class="convoc-btn">Ver más ...</a>
+    </div>
+  </div>
+</div>
+</div>
+<!-- FACEBOOK + YOUTUBE -->
+<div class="social-grid">
+  <div class="social-col">
+    <h3>📘 SÍGUENOS EN <span>FACEBOOK</span></h3>
+    <div class="fb-wrap"><iframe src="https://www.facebook.com/plugins/page.php?href=https%3A%2F%2Fwww.facebook.com%2FCesmeca%2F&tabs=timeline&width=400&height=500&small_header=false&adapt_container_width=true&hide_cover=false&show_facepile=true"
+      width="100%" height="500" style="border:none;overflow:hidden;border-radius:8px" 
+      scrolling="no" frameborder="0" allowfullscreen
+      allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share" loading="lazy">
+    </iframe>
+    </div>
+  </div>
+  <div class="social-col">
+    <h3>▶ CANAL <span>YOUTUBE</span></h3>
+    <?php
+    $yt_fallback = [
+        ['id' => 'AgXqmPGGIZQ', 'title' => 'Cristina Patishtán'],
+        ['id' => 'LKJ8uveFo1E', 'title' => 'Mikel Ruiz'],
+        ['id' => '9eh0cIzDQx8', 'title' => 'Fronteras en la vida cotidiana'],
+        ['id' => 'q4fmKCWPLtM', 'title' => '#8M2024'],
+    ];
+    $yt_videos = get_transient('cesmeca_yt_videos');
+    if(false === $yt_videos) {
+        $yt_videos = [];
+        $yt_feed = 'https://www.youtube.com/feeds/videos.xml?channel_id=UCzVGC_C3-tXz5FUJSb30zAA';
+        $yt_xml = @simplexml_load_file($yt_feed);
+        if($yt_xml) {
+            foreach($yt_xml->entry as $entry) {
+                $yt_ns = $entry->children('yt', true);
+                $vid_id = (string)$yt_ns->videoId;
+                $title = (string)$entry->title;
+                if($vid_id !== 'bDchhJxInWA') {
+                    $yt_videos[] = ['id' => $vid_id, 'title' => $title];
+                }
+                if(count($yt_videos) >= 4) break;
+            }
+        }
+        if(!empty($yt_videos)) {
+            set_transient('cesmeca_yt_videos', $yt_videos, 6 * HOUR_IN_SECONDS);
+        } else {
+            $yt_videos = $yt_fallback;
+        }
+    }
+    ?>
+    <div style="position:relative">
+      <button class="yt-nav prev" onclick="ytNav(-1)">&#8249;</button>
+      <div class="yt-slider-wrap">
+        <div class="yt-slider-track" id="ytTrack">
+          <?php foreach($yt_videos as $v): ?>
+          <div class="yt-slide" onclick="window.open('https://www.youtube.com/watch?v=<?php echo esc_attr($v['id']); ?>','_blank')">
+            <img src="https://i.ytimg.com/vi/<?php echo esc_attr($v['id']); ?>/hqdefault.jpg"
+                 alt="<?php echo esc_attr($v['title']); ?>">
+            <div class="yt-slide-overlay"><div class="yt-channel-bar">CESMECA-UNICACH OFICIAL</div>
+              <div class="yt-play-btn">
+                <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+              </div>
+              <div class="yt-title-bar"><?php echo esc_html($v['title']); ?></div>
+            </div>
+          </div>
+          <?php endforeach; ?>
+        </div>
+      </div>
+      <button class="yt-nav next" onclick="ytNav(1)">&#8250;</button>
+      <div class="yt-dots" id="ytDots">
+        <?php foreach($yt_videos as $i => $v): ?>
+        <button class="yt-dot <?php echo $i===0?'active':''; ?>" onclick="ytGo(<?php echo $i; ?>)"></button>
+        <?php endforeach; ?>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- REPOSITORIO -->
+<div style="text-align:center;padding:16px 24px 48px">
+  <a href="https://repositorio.cesmeca.mx/" target="_blank" class="repo-banner">
+    <img src="https://cesmeca.mx/images/2020/01/17/repositorio.png" alt="Repositorio Institucional CESMECA">
+  </a>
+</div>
+<!-- REDES SOCIALES -->
+<div class="redes-section">
+  <p>Síguenos en nuestras redes sociales</p>
+  <div class="redes-icons">
+    <a href="https://www.facebook.com/Cesmeca/" target="_blank" title="Facebook">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+    </a>
+    <a href="https://www.youtube.com/@CESMECAUNICACH" target="_blank" title="YouTube">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M23.495 6.205a3.007 3.007 0 0 0-2.088-2.088c-1.87-.501-9.396-.501-9.396-.501s-7.507-.01-9.396.501A3.007 3.007 0 0 0 .527 6.205a31.247 31.247 0 0 0-.522 5.805 31.247 31.247 0 0 0 .522 5.783 3.007 3.007 0 0 0 2.088 2.088c1.868.502 9.396.502 9.396.502s7.506 0 9.396-.502a3.007 3.007 0 0 0 2.088-2.088 31.247 31.247 0 0 0 .5-5.783 31.247 31.247 0 0 0-.5-5.805zM9.609 15.601V8.408l6.264 3.602z"/></svg>
+    </a>
+    <a href="https://twitter.com/cesmeca" target="_blank" title="X/Twitter">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+    </a>
+    <a href="https://www.instagram.com/cesmeca/" target="_blank" title="Instagram">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+    </a>
+    <a href="https://www.tiktok.com/@cesmeca" target="_blank" title="TikTok">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.26 8.26 0 004.84 1.56V6.79a4.85 4.85 0 01-1.07-.1z"/></svg>
+    </a>
+  </div>
+</div>
+
+</div>
+
+<script>
+
+// Agenda slider
+var agendaIdx = 0;
+var agendaTotal = 0;
+function agendaNav(dir) {
+  var el = document.getElementById('agendaTrack');
+  if (!el) return;
+  agendaTotal = el.children.length;
+  agendaIdx = Math.max(0, Math.min(agendaTotal - 3, agendaIdx + dir));
+  var cardW = el.children[0] ? el.children[0].offsetWidth + 16 : 300;
+  el.style.transform = 'translateX(-' + (agendaIdx * cardW) + 'px)';
+}
+setInterval(function(){
+  var el = document.getElementById('agendaTrack');
+  if(!el) return;
+  agendaTotal = el.children.length;
+  if(agendaIdx >= agendaTotal - 3) agendaIdx = -1;
+  agendaNav(1);
+}, 4000);
+
+// Notas slider
+var notasIdx = 0;
+function notasNav(dir) {
+  var el = document.getElementById('notasTrack');
+  if(!el) return;
+  var total = el.children.length;
+  notasIdx = Math.max(0, Math.min(total - 3, notasIdx + dir));
+  var cardW = el.children[0] ? el.children[0].offsetWidth + 16 : 300;
+  el.style.transform = 'translateX(-' + (notasIdx * cardW) + 'px)';
+}
+setInterval(function(){ 
+  var el = document.getElementById('notasTrack');
+  if(!el) return;
+  if(notasIdx >= el.children.length - 3) notasIdx = -1;
+  notasNav(1);
+}, 5000);
+
+// YT slider
+var ytIdx = 0;
+var ytTotal = 0;
+function ytGo(n) {
+  var el = document.getElementById('ytTrack');
+  if(!el) return;
+  ytTotal = el.children.length;
+  ytIdx = (n + ytTotal) % ytTotal;
+  el.style.transform = 'translateX(-' + (ytIdx * 100) + '%)';
+  document.querySelectorAll('#ytDots .yt-dot').forEach(function(d,i){
+    d.classList.toggle('active', i===ytIdx);
+  });
+}
+function ytNav(d) { ytGo(ytIdx + d); }
+setInterval(function(){ ytNav(1); }, 5000);
+
+// Pub slider con dots
+var pubIdx = {};
+function pubInitDots(id) {
+  var el = document.getElementById('pub-' + id);
+  var dotsEl = document.getElementById('dots-' + id);
+  if(!el || !dotsEl) return;
+  var visible = 3;
+  var total = el.children.length;
+  var pages = Math.ceil(total / visible);
+  dotsEl.innerHTML = '';
+  for(var i=0; i<pages; i++) {
+    var d = document.createElement('button');
+    d.className = 'pub-dot' + (i===0?' active':'');
+    d.setAttribute('data-page', i);
+    d.setAttribute('data-id', id);
+    d.onclick = function(){ pubGoPage(this.getAttribute('data-id'), parseInt(this.getAttribute('data-page'))); };
+    dotsEl.appendChild(d);
+  }
+}
+function pubUpdateDots(id) {
+  var el = document.getElementById('pub-' + id);
+  var dotsEl = document.getElementById('dots-' + id);
+  if(!el || !dotsEl) return;
+  var visible = 3;
+  var page = Math.floor((pubIdx[id]||0) / visible);
+  dotsEl.querySelectorAll('.pub-dot').forEach(function(d,i){ d.classList.toggle('active', i===page); });
+}
+function pubGoPage(id, page) {
+  var el = document.getElementById('pub-' + id);
+  if(!el) return;
+  var visible = 3;
+  pubIdx[id] = page * visible;
+  var cardW = el.children[0] ? el.children[0].offsetWidth + 12 : 152;
+  el.style.transform = 'translateX(-' + (pubIdx[id] * cardW) + 'px)';
+  pubUpdateDots(id);
+}
+function pubNav(id, dir) {
+  var el = document.getElementById('pub-' + id);
+  if (!el) return;
+  if (!pubIdx[id]) pubIdx[id] = 0;
+  var visible = 3;
+  var total = el.children.length;
+  pubIdx[id] = Math.max(0, Math.min(total - visible, pubIdx[id] + dir));
+  var cardW = el.children[0] ? el.children[0].offsetWidth + 12 : 152;
+  el.style.transform = 'translateX(-' + (pubIdx[id] * cardW) + 'px)';
+  pubUpdateDots(id);
+}
+// Init dots after load
+window.addEventListener('load', function(){
+  pubInitDots('libros');
+  pubInitDots('revistas');
+});
+// Auto-scroll
+setInterval(function(){
+  var el = document.getElementById('pub-libros');
+  if(!el) return;
+  if(!pubIdx['libros']) pubIdx['libros'] = 0;
+  if(pubIdx['libros'] >= el.children.length - 3) pubIdx['libros'] = -1;
+  pubNav('libros', 1);
+}, 3500);
+setInterval(function(){
+  var el = document.getElementById('pub-revistas');
+  if(!el) return;
+  if(!pubIdx['revistas']) pubIdx['revistas'] = 0;
+  if(pubIdx['revistas'] >= el.children.length - 3) pubIdx['revistas'] = -1;
+  pubNav('revistas', 1);
+}, 4000);
+</script>
+    <?php
+    return ob_get_clean();
+}
+add_shortcode('inicio_page', 'inicio_page_shortcode');
+

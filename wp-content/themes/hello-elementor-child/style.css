@@ -1,0 +1,636 @@
+/*
+Theme Name: Hello Elementor Child CESMECA
+Template: hello-elementor
+Description: Tema hijo para CESMECA con plantilla de publicaciones
+Version: 1.0
+*/
+
+/* ── Grid de Publicaciones ── */
+.publicaciones-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 28px;
+    padding: 30px 0;
+}
+.pub-card {
+    background: #fff;
+    border: 1px solid #e5e5e5;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.07);
+    display: flex;
+    flex-direction: column;
+    transition: box-shadow 0.2s ease;
+}
+.pub-card:hover { box-shadow: 0 6px 18px rgba(0,0,0,0.13); }
+.pub-card-image {
+    position: relative;
+    background: #f0f0f0;
+    height: 240px;
+    overflow: hidden;
+}
+.pub-card-image img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.pub-card-image .no-cover {
+    width: 100%; height: 100%;
+    display: flex; align-items: center; justify-content: center;
+    background: linear-gradient(135deg, #e8e8e8, #d0d0d0);
+    color: #999; font-size: 13px; text-align: center; padding: 20px;
+}
+.pub-card-badge {
+    position: absolute; top: 12px; right: 12px;
+    background: #3a7d44; color: #fff;
+    font-size: 11px; font-weight: 600;
+    padding: 4px 10px; border-radius: 20px;
+    text-transform: uppercase; letter-spacing: 0.5px;
+}
+.pub-card-body { padding: 18px; flex: 1; display: flex; flex-direction: column; }
+.pub-card-title { font-size: 16px; font-weight: 700; margin: 0 0 10px; line-height: 1.35; }
+.pub-card-title a { color: #1a1a1a; text-decoration: none; }
+.pub-card-title a:hover { color: #3a7d44; }
+.pub-card-excerpt {
+    font-size: 13px; color: #555; line-height: 1.6; flex: 1;
+    overflow: hidden; display: -webkit-box;
+    -webkit-line-clamp: 4; -webkit-box-orient: vertical;
+}
+.pub-card-footer {
+    padding: 12px 18px; border-top: 1px solid #f0f0f0;
+    display: flex; justify-content: space-between; align-items: center;
+}
+.pub-card-date { font-size: 12px; color: #999; }
+.pub-card-link { font-size: 12px; font-weight: 600; color: #3a7d44; text-decoration: none; text-transform: uppercase; letter-spacing: 0.5px; }
+.pub-card-link:hover { text-decoration: underline; }
+.publicaciones-pagination { margin-top: 30px; margin-bottom: 60px; display: flex; justify-content: center; gap: 10px; }
+.publicaciones-pagination .page-numbers { padding: 8px 14px; border: 1px solid #ddd; border-radius: 4px; color: #333; text-decoration: none; font-size: 14px; }
+.publicaciones-pagination .page-numbers.current,
+.publicaciones-pagination .page-numbers:hover { background: #3a7d44; color: #fff; border-color: #3a7d44; }
+.publicaciones-header { margin-bottom: 10px; padding-bottom: 15px;  }
+.publicaciones-header h1 { font-size: 35px; font-weight: 500; color: #1a1a1a; margin: 0; font-family: 'Lora', serif; }
+
+/* ── Single Post: imagen destacada ── */
+.single-post .post-featured-image img,
+.post .wp-post-image {
+    max-width: 320px !important;
+    width: 320px !important;
+    height: auto !important;
+    max-height: none !important;
+    object-fit: unset !important;
+    display: block !important;
+    margin: 0 auto 25px auto !important;
+    border-radius: 4px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+/* ── Responsive ── */
+@media (max-width: 900px) { .publicaciones-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 580px) {
+    .publicaciones-grid { grid-template-columns: 1fr; }
+    .single-post .post-featured-image img, .post .wp-post-image { max-width: 100% !important; width: 100% !important; }
+}
+
+/* Banderilla fecha hover */
+.pub-card-image {
+    position: relative;
+    overflow: hidden;
+}
+.pub-card-date-hover {
+    position: absolute;
+    bottom: 40px;
+    right: -100%;
+    background: #000;
+    color: #fff;
+    padding: 4px 10px;
+    font-size: 13px;
+    border-radius: 3px 0 0 3px;
+    transition: right 0.3s ease;
+    white-space: nowrap;
+    z-index: 10;
+}
+.pub-card-date-hover::after {
+    content: '';
+    position: absolute;
+    right: -6px;
+    top: 50%;
+    transform: translateY(-50%);
+    border-left: 6px solid #000;
+    border-top: 6px solid transparent;
+    border-bottom: 6px solid transparent;
+}
+.pub-card:hover .pub-card-date-hover {
+    right: 0;
+}
+
+/* Forzar posicion relativa en publicaciones */
+.pub-card .pub-card-image {
+    position: relative !important;
+    overflow: hidden !important;
+}
+
+/* Banderilla fecha hover - Elementor posts */
+
+/* Header estilo producción */
+
+/* HEADER */
+.site-header{background-color:#1a1a2e!important;position:sticky!important;top:0!important;z-index:9999!important;box-shadow:0 2px 10px rgba(0,0,0,0.3)!important;}
+.site-header .header-inner{display:flex!important;align-items:center!important;justify-content:space-between!important;max-width:1400px!important;margin:0 auto!important;padding:0 20px!important;width:100%!important;}
+.site-header .site-branding{display:flex!important;align-items:center!important;flex-shrink:0!important;}
+.site-header .site-title{display:none!important;}
+.site-header .site-branding::before{content:''!important;display:block!important;width:190px!important;height:51px!important;background-image:url('/wp-content/uploads/2026/07/logo-web-cesmeca.png')!important;background-size:contain!important;background-repeat:no-repeat!important;background-position:left center!important;}
+.site-header .site-navigation{display:flex!important;align-items:center!important;}
+.site-header .site-navigation ul.menu{display:flex!important;align-items:center!important;list-style:none!important;margin:0!important;padding:0!important;}
+.site-header .site-navigation ul.menu > li > a{color:#ffffff!important;text-transform:uppercase!important;font-size:11.5px!important;font-weight:600!important;letter-spacing:0.6px!important;padding:20px 9px!important;display:block!important;text-decoration:none!important;white-space:nowrap!important;}
+.site-header .site-navigation ul.menu > li > a:hover{color:#c8a96e!important;}
+.site-header .site-navigation .sub-menu{background:#ffffff!important;border-top:2px solid #1a3d63!important;min-width:200px!important;box-shadow:0 4px 12px rgba(0,0,0,0.15)!important;}
+.site-header .site-navigation .sub-menu a{color:#1a3d63!important;font-size:12px!important;padding:10px 15px!important;white-space:normal!important;text-decoration:none!important;display:block!important;width:100%!important;box-sizing:border-box!important;}
+.site-header .site-navigation .sub-menu a:hover{color:#ffffff!important;background:#3d8fb5!important;}
+@media(max-width:900px){
+.site-header .site-navigation{display:none!important;}
+.site-header .site-navigation-dropdown{background-color:#ffffff!important;}
+.site-header .site-navigation-dropdown a{color:#1a3d63!important;font-size:13px!important;padding:10px 20px!important;display:block!important;}
+.site-header .site-navigation-dropdown a:hover{color:#ffffff!important;background:#3d8fb5!important;}
+.site-header .site-branding::before{width:120px!important;height:32px!important;}
+}
+
+.site-header .header-inner{width:100%!important;box-sizing:border-box!important;}
+.site-header{width:100%!important;}
+
+
+/* Respetar breakpoint nativo 992px del tema */
+@media(max-width:992px){
+    .site-header.menu-dropdown-tablet .site-navigation{display:none!important;}
+    .site-header .site-navigation-dropdown ul.menu{background:#ffffff!important;}
+    .site-header .site-navigation-dropdown ul.menu li a{background:#ffffff!important;color:#1a3d63!important;text-transform:uppercase!important;font-size:12px!important;}
+.site-header .site-navigation-dropdown ul.menu li a:hover{background:#3d8fb5!important;color:#ffffff!important;}
+    .site-header .site-navigation-dropdown ul.menu li.current-menu-item a{background:#1a3d63!important;color:#fff!important;}
+}
+@media(min-width:993px){
+    .site-header.menu-dropdown-tablet .site-navigation{display:flex!important;}
+}
+
+
+
+
+/* Tablet: logo centrado cuando no hay espacio */
+@media (max-width: 1100px) and (min-width: 993px) {
+    .site-header .site-navigation ul.menu > li > a {
+        font-size: 10.5px !important;
+        padding: 20px 6px !important;
+        letter-spacing: 0.3px !important;
+    }
+}
+
+
+
+/* Hamburguesa blanco */
+.site-header .site-navigation-toggle-holder .site-navigation-toggle {
+    background: transparent !important;
+    color: #ffffff !important;
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+
+/* Ocultar titulo Inicio */
+.page-id-668 .page-title,
+.page-id-668 .entry-title,
+.page-id-668 .elementor-page-title { display: none !important; }
+
+/* Hero slider full width */
+
+
+
+/* Hero slider */
+.page-id-668 .hero-slider{width:100vw!important;margin-left:calc(-50vw + 50%)!important;height:500px!important;background:#000!important;left:0!important;position:relative!important;}
+.page-id-668 .hero-slide{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;}
+.page-id-668 .hero-slide a{display:block!important;width:100%!important;height:100%!important;}
+.page-id-668 .hero-slide img{width:100%!important;height:100%!important;object-fit:cover!important;object-position:center!important;display:block!important;}
+@media(max-width:768px){.page-id-668 .hero-slider{height:auto!important;aspect-ratio:16/9!important;}}
+
+.hero-slider-full{width:100%;overflow:hidden;}
+.hero-slider-full .hero-slider{width:100%!important;margin:0!important;}
+
+/* Ocultar imagen destacada en vista single de post */
+
+/* Ocultar imagen destacada solo en agenda y notas, NO en publicaciones */
+.single-post.category-agenda-cultural .post-featured-image,
+.single-post.category-notas-informativas .post-featured-image,
+.single-post.category-agenda-cultural img.wp-post-image,
+.single-post.category-notas-informativas img.wp-post-image {
+    display: none;
+}
+
+/* Espacio entre header y título de página */
+.page-header {
+    padding-top: 40px;
+}
+
+/* Excluir padding en página de inicio */
+.page-id-668 .page-header {
+}
+
+/* Excluir padding en página de inicio */
+.page-id-668 .page-header {
+    padding-top: 0;
+}
+/* Slider ancho completo */
+.page-id-668 .elementor-widget-slides,
+.page-id-668 .swiper-slide {
+    width: 100%;
+}
+/* Excluir padding en página de inicio */
+.page-id-668 .page-header {
+    padding-top: 0;
+}
+
+/* Slider ancho completo */
+.page-id-668 .elementor-widget-slides,
+.page-id-668 .swiper-slide {
+    width: 100%;
+}
+
+/* Forzar slider a ancho completo */
+.page-id-668 .elementor-element-cbfafb2,
+.page-id-668 .elementor-slides-wrapper,
+.page-id-668 .swiper,
+.page-id-668 .swiper-wrapper,
+.page-id-668 .swiper-slide {
+    width: 100% !important;
+    max-width: 100% !important;
+}
+.page-id-668 .swiper-slide-bg {
+    background-size: cover !important;
+    background-position: center !important;
+    width: 100% !important;
+}
+
+/* Slider ocupa todo el ancho del viewport */
+.page-id-668 .elementor-element-b80cd3c {
+    width: 100% !important;
+    max-width: 100% !important;
+    left: 0 !important;
+    transform: none !important;
+    position: relative !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+/* ── Tipografía institucional (Source Sans Pro / Lora) ── */
+body,
+p, li, span, a, div,
+.elementor-widget-text-editor,
+.site-navigation ul.menu > li > a {
+    font-family: 'Source Sans Pro', sans-serif;
+    line-height: 1.7;
+}
+
+h1, h2, h3, h4, h5, h6,
+.elementor-heading-title,
+.page-title, .entry-title {
+    font-family: 'Lora', serif;
+    letter-spacing: 0.01em;
+}
+
+h1, h2 {
+    font-weight: 700;
+}
+
+h3, h4, h5, h6 {
+    font-weight: 400;
+}
+
+/* Ocultar footer por defecto de Hello Elementor */
+.site-footer,
+
+/* Ocultar footer por defecto de Hello Elementor */
+.site-footer,
+footer.site-footer,
+.elementor-location-footer .site-footer {
+    display: none !important;
+}
+
+#site-footer.site-footer {
+    display: none !important;
+}
+
+.site-footer .footer-inner .copyright p {
+    display: none !important;
+}
+
+.site-footer .footer-inner .copyright p {
+    display: none !important;
+}
+
+/* ── Botones para enlaces de documentos institucionales (PDF, actas) ── */
+body .page-content a[href$=".pdf"],
+body .page-content a[href*="category/blog"],
+body .elementor-widget-text-editor .page-content a[href$=".pdf"],
+body .elementor-widget-text-editor .page-content a[href*="category/blog"] {
+    display: inline-block !important;
+    background-color: #6998b6 !important;
+    color: #ffffff !important;
+    padding: 10px 20px !important;
+    margin: 6px 0 !important;
+    border-radius: 4px !important;
+    text-decoration: none !important;
+    font-weight: 600 !important;
+    transition: background-color 0.2s ease !important;
+}
+body .page-content a[href$=".pdf"]:hover,
+body .page-content a[href*="category/blog"]:hover {
+    background-color: #5a86a0 !important;
+}
+
+/* Espaciado paginación de Publicaciones */
+.elementor-691 .elementor-element.elementor-element-3cdbd7f .elementor-pagination {
+    margin-bottom: 40px;
+}
+
+/* ── Banner slider CPT (reemplazo del widget de Elementor) ── */
+.elementor-widget-shortcode .elementor-widget-container,
+.elementor-shortcode {
+    overflow: hidden !important;
+}
+.cesmeca-banner-slider {
+    position: relative !important;
+    width: 100% !important;
+    aspect-ratio: 2.73 / 1 !important;
+    overflow: hidden !important;
+    background: #1a3d63 !important;
+    display: block !important;
+}
+.cesmeca-banner-track {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    height: 100% !important;
+    transition: transform 0.6s ease !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    list-style: none !important;
+}
+.cesmeca-banner-slide {
+    flex: 0 0 100% !important;
+    max-width: 100% !important;
+    height: 100% !important;
+    margin: 0 !important;
+}
+.cesmeca-banner-slide a,
+.cesmeca-banner-slide img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+.cesmeca-banner-prev,
+.cesmeca-banner-next {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0,0,0,0.4);
+    color: #fff;
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    font-size: 22px;
+    cursor: pointer;
+    z-index: 5;
+}
+.cesmeca-banner-prev { left: 15px; }
+.cesmeca-banner-next { right: 15px; }
+.cesmeca-banner-prev:hover,
+.cesmeca-banner-next:hover { background: rgba(0,0,0,0.7); }
+.cesmeca-banner-dots {
+    position: absolute;
+    bottom: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 8px;
+    z-index: 5;
+}
+.cesmeca-banner-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.5);
+    border: none;
+    cursor: pointer;
+    padding: 0;
+}
+.cesmeca-banner-dot.active {
+    background: #ffffff;
+}
+@media (max-width: 768px) {
+    .cesmeca-banner-slider {
+        aspect-ratio: 16 / 9;
+        max-height: 220px;
+    }
+}
+
+/* Ocultar imagen destacada solo en publicaciones de la categoría Consejo Académico */
+main.category-concejo-academico .single-featured-img {
+    display: none !important;
+}
+
+/* Espacio antes del footer */
+.page-content {
+    padding-bottom: 40px; margin-bottom: 80px;
+}
+
+/* Diferenciación visual submenú móvil/tablet - fondo gris suave + indent */
+@media(max-width:992px){
+    .site-navigation-dropdown ul.menu li ul.sub-menu{
+        background:#f5f6f8!important;
+    }
+    .site-navigation-dropdown ul.menu li ul.sub-menu li a{
+        background:#f5f6f8!important;
+        color:#34495e!important;
+        font-size:11px!important;
+        padding:9px 15px 9px 30px!important;
+        border-left:3px solid #3d8fb5!important;
+        text-transform:none!important;
+    }
+    .site-navigation-dropdown ul.menu li ul.sub-menu li a:hover{
+        background:#e8f0fa!important;
+        color:#1a3d63!important;
+    }
+    .site-navigation-dropdown ul.menu li ul.sub-menu li.current-menu-item a{
+        background:#1a3d63!important;
+        color:#fff!important;
+        border-left-color:#c8a96e!important;
+    }
+}
+
+
+
+/* Ocultar ícono nativo de Elementor Pro Nav Menu (duplica nuestra flecha custom) */
+.site-navigation .elementor-menu-toggle,
+.site-navigation .sub-arrow,
+.site-navigation ul.menu li.menu-item-has-children > .elementor-icon,
+.site-navigation ul.menu li.menu-item-has-children > svg,
+.site-navigation ul.menu li.menu-item-has-children > i,
+.site-navigation-dropdown .elementor-menu-toggle,
+.site-navigation-dropdown .sub-arrow,
+.site-navigation-dropdown ul.menu li.menu-item-has-children > .elementor-icon,
+.site-navigation-dropdown ul.menu li.menu-item-has-children > svg,
+.site-navigation-dropdown ul.menu li.menu-item-has-children > i{
+    display:none!important;
+}
+
+
+
+/* Suavizar resaltado de item activo en submenú móvil/tablet */
+.site-navigation-dropdown ul.menu li ul.sub-menu li.current-menu-item a{
+    background:#e8f0fa!important;
+    color:#1a3d63!important;
+    font-weight:600!important;
+    border-left-color:#c8a96e!important;
+}
+
+/* Logo más grande en tarjetas de Retribución Social - solo desktop */
+@media(min-width:993px){
+    .posg-btn img{
+        width:56px!important;
+        height:56px!important;
+    }
+}
+
+/* Ocultar título duplicado del tema en página Maestría CSH (ya se inyecta dentro del flex del shortcode) */
+.page-id-1707 .page-title,
+.page-id-1707 .entry-title,
+.page-id-1707 .elementor-page-title { display: none !important; }
+
+/* Ocultar título duplicado del tema en página Doctorado CSH */
+.page-id-1708 .page-title,
+.page-id-1708 .entry-title,
+.page-id-1708 .elementor-page-title { display: none !important; }
+
+/* Ocultar título duplicado del tema en página Maestría EIF */
+.page-id-1705 .page-title,
+.page-id-1705 .entry-title,
+.page-id-1705 .elementor-page-title { display: none !important; }
+
+/* Ocultar título duplicado del tema en página Doctorado EIF */
+.page-id-1706 .page-title,
+.page-id-1706 .entry-title,
+.page-id-1706 .elementor-page-title { display: none !important; }
+
+
+/* Ocultar título+línea duplicados DENTRO del shortcode en páginas Retribución Social (queda solo el título del tema) */
+.page-id-1737 .articulo-programa h1,
+.page-id-1738 .articulo-programa h1,
+.page-id-1739 .titulo-documento,
+.page-id-1739 .linea-separadora,
+.page-id-1740 .titulo-documento,
+.page-id-1740 .linea-separadora { display: none !important; }
+
+/* Igualar altura de tarjetas Consejo Académico (misma solución que Agenda/Notas) */
+.publicaciones-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px;align-items:stretch}
+.pub-card{display:flex;flex-direction:column;height:100%}
+.pub-card-body{flex-grow:1;display:flex;flex-direction:column}
+.pub-card-excerpt{flex-grow:1}
+.pub-card-footer{margin-top:auto}
+
+/* Fix video destacado inicio (widget Elementor V4 e-youtube) - proporcion 16:9 forzada, no depende del JS de Elementor */
+[data-id="d16e3f2"]{aspect-ratio:16/9!important;width:100%!important;height:auto!important;max-width:1400px!important;margin:0 auto!important}
+[data-id="d16e3f2"] iframe{width:100%!important;height:100%!important;aspect-ratio:16/9!important}
+
+/* ── Flecha submenú (bloque único, consolidado Ago 2026) ── */
+
+/* Desktop */
+.site-header .site-navigation ul.menu li.menu-item-has-children > a{
+    display:flex!important;
+    align-items:center!important;
+}
+.site-header .site-navigation ul.menu li.menu-item-has-children > a::after{
+    content:'❯'!important;
+    font-size:0.9em!important;
+    color:#ffffff!important;
+    display:inline-block!important;
+    margin-left:6px!important;
+    transform:rotate(90deg)!important;
+    transition:transform 0.2s ease!important;
+}
+.site-header .site-navigation ul.menu li.menu-item-has-children:hover > a::after{
+    transform:rotate(-90deg)!important;
+}
+
+/* Móvil/tablet: área de toque más grande, separada del texto */
+.site-navigation-dropdown ul.menu li.menu-item-has-children > a{
+    display:flex!important;
+    align-items:center!important;
+    justify-content:space-between!important;
+    padding-right:20px!important;
+}
+.site-navigation-dropdown ul.menu li.menu-item-has-children > a::after{
+    content:'❯'!important;
+    color:#1a3d63!important;
+    font-size:1.1em!important;
+    line-height:1!important;
+    display:inline-flex!important;
+    align-items:center;
+    justify-content:center;
+    min-width:32px;
+    min-height:32px;
+    margin-left:auto;
+    transition:transform 0.2s ease!important;
+}
+.site-navigation-dropdown ul.menu li.menu-item-has-children.elementor-active > a::after{
+    transform:rotate(90deg)!important;
+}
+
+/* Ocultar flecha duplicada inyectada por plugin header-foo (li::after), ya tenemos la nuestra en a::after */
+.site-navigation ul.menu li.menu-item-has-children::after,
+.site-header .site-navigation ul.menu li.menu-item-has-children::after {
+    content:none!important;
+    display:none!important;
+}
+
+/* Color de enlaces (DOI, etc.) dentro del contenido de Publicaciones - azul institucional en vez del magenta por defecto de Elementor */
+.single-content a,
+.pub-card-excerpt a {
+    color: #1a6ebd !important;
+}
+.single-content a:hover,
+.pub-card-excerpt a:hover {
+    color: #145a99 !important;
+}
+
+/* Botones de paginación "Anterior/Siguiente" de Publicaciones - azul institucional del submenu en vez del azul brillante por defecto */
+.publicaciones-pagination .page-numbers.next,
+.publicaciones-pagination .page-numbers.prev {
+    background: #3d8fb5 !important;
+    border-color: #3d8fb5 !important;
+    color: #fff !important;
+}
+.publicaciones-pagination .page-numbers.next:hover,
+.publicaciones-pagination .page-numbers.prev:hover {
+    background: #2c6d8a !important;
+    border-color: #2c6d8a !important;
+}
+
+/* Numero de pagina activo en Publicaciones - azul institucional en vez de verde por defecto */
+.publicaciones-pagination .page-numbers.current {
+    background: #3d8fb5 !important;
+    border-color: #3d8fb5 !important;
+    color: #fff !important;
+}
+
+/* Anterior/Siguiente en vista individual de publicacion - azul institucional en hover */
+.single-post-nav a:hover {
+    background: #3d8fb5 !important;
+    border-color: #3d8fb5 !important;
+    color: #fff !important;
+}
+
+/* Icono del pin en vista individual de publicacion - fondo azul institucional en vez del rojo chillante */
+.single-pin {
+    background: #3d8fb5;
+    color: #fff;
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+}

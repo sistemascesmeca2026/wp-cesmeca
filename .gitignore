@@ -1,0 +1,5 @@
+.env
+database/data/
+wp-content/uploads/
+backups/
+database/cesmeca_export.sql
