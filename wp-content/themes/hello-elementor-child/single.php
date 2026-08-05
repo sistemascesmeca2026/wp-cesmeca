@@ -58,6 +58,7 @@ while ( have_posts() ) :
     justify-content: space-between;
     align-items: center;
     margin-top: 48px;
+    margin-bottom: 48px;
     padding-top: 24px;
     border-top: 1px solid #eee;
     gap: 12px;
