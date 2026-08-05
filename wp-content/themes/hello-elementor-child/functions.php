@@ -653,3 +653,214 @@ add_action('init', function () {
         'top'
     );
 });
+
+/**
+ * Renderiza una pagina con bloque de intro opcional + pestañas de tipo
+ * imagenes / videos / posts (eventos dinamicos de WordPress).
+ * Consolida el patron repetido en laud/lacem/eac y demas shortcodes.
+ */
+function cesmeca_render_gallery_tabs($args) {
+    $prefix     = isset($args['prefix']) ? sanitize_html_class($args['prefix']) : 'cgt';
+    $intro_html = $args['intro_html'] ?? '';
+    $tabs       = $args['tabs'] ?? [];
+    $uid        = $prefix . '_' . uniqid();
+
+    ob_start();
+    ?>
+<style>
+.<?php echo $prefix; ?>-intro{display:flex;gap:40px;margin-bottom:36px;align-items:flex-start}
+.<?php echo $prefix; ?>-intro-text{flex:2}
+.<?php echo $prefix; ?>-intro-img{flex:1;text-align:center}
+.<?php echo $prefix; ?>-intro-img img{max-width:100%;border-radius:6px}
+.<?php echo $prefix; ?>-intro-text h1,.<?php echo $prefix; ?>-intro-text h2{font-size:40px;margin-bottom:16px;color:#1a1a2e;font-family:'Lora',serif}
+.<?php echo $prefix; ?>-intro-text h3{font-size:1.1rem;margin:20px 0 8px;color:#1a1a2e}
+.<?php echo $prefix; ?>-intro-text p,.<?php echo $prefix; ?>-intro-text li{font-size:.97rem;line-height:1.7;text-align:justify;color:#333}
+.<?php echo $prefix; ?>-intro-text ul{padding-left:20px}
+.<?php echo $prefix; ?>-intro-text a{color:#2563eb}
+
+.<?php echo $prefix; ?>-tabs-nav{display:flex;flex-wrap:wrap;border-bottom:2px solid #ddd;margin-bottom:24px;gap:4px}
+.<?php echo $prefix; ?>-tab-btn{padding:8px 16px;background:#5dade2;border:1px solid #ddd;border-bottom:none;cursor:pointer;font-size:.9rem;color:#fff;border-radius:4px 4px 0 0}
+.<?php echo $prefix; ?>-tab-btn:hover,.<?php echo $prefix; ?>-tab-btn:focus{background:#5dade2!important;color:#fff!important;text-decoration:none}
+.<?php echo $prefix; ?>-tab-btn.active{background:#3498db!important;color:#fff!important;font-weight:600;border-bottom:2px solid #3498db;margin-bottom:-2px}
+.<?php echo $prefix; ?>-tab-btn.active:hover,.<?php echo $prefix; ?>-tab-btn.active:focus{background:#3498db!important;color:#fff!important}
+.<?php echo $prefix; ?>-tab-panel{display:none}
+.<?php echo $prefix; ?>-tab-panel.active{display:block}
+.<?php echo $prefix; ?>-tabs-wrapper{border:1px solid #e0e0e0!important;border-radius:8px!important;padding:24px!important;box-shadow:0 2px 10px rgba(0,0,0,.06)!important}
+
+.<?php echo $prefix; ?>-gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:16px;margin-top:8px}
+.<?php echo $prefix; ?>-gallery-item{cursor:pointer;border-radius:6px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.1)}
+.<?php echo $prefix; ?>-gallery-item img{width:100%;height:220px;object-fit:cover;display:block;transition:transform .2s}
+.<?php echo $prefix; ?>-gallery-item:hover img{transform:scale(1.03)}
+
+.<?php echo $prefix; ?>-videos-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:20px;margin-top:8px}
+.<?php echo $prefix; ?>-video-item{cursor:pointer;border-radius:8px;overflow:hidden;background:#000;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.<?php echo $prefix; ?>-video-thumb{position:relative}
+.<?php echo $prefix; ?>-video-thumb img{width:100%;height:160px;object-fit:cover;display:block;opacity:.85}
+.<?php echo $prefix; ?>-video-item:hover .<?php echo $prefix; ?>-video-thumb img{opacity:1}
+.<?php echo $prefix; ?>-video-play{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:48px;height:48px;background:rgba(255,0,0,.85);border-radius:50%;display:flex;align-items:center;justify-content:center}
+.<?php echo $prefix; ?>-video-play svg{width:20px;height:20px;fill:#fff;margin-left:3px}
+.<?php echo $prefix; ?>-video-title{padding:10px 12px;background:#111;color:#eee;font-size:.8rem;line-height:1.4;min-height:52px}
+
+.<?php echo $prefix; ?>-eventos-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:28px}
+.<?php echo $prefix; ?>-content-block{font-size:.97rem;line-height:1.7;color:#333}
+.<?php echo $prefix; ?>-content-block p{margin-bottom:12px;text-align:justify}
+.<?php echo $prefix; ?>-content-block ul{padding-left:20px;margin-bottom:12px}
+.<?php echo $prefix; ?>-content-block li{margin-bottom:8px}
+.<?php echo $prefix; ?>-content-block img{max-width:320px;border-radius:6px;margin:12px 0;display:block}
+.<?php echo $prefix; ?>-evento-card{background:#fff;border:1px solid #e5e5e5;border-radius:8px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.06);transition:transform .2s,box-shadow .2s}
+.<?php echo $prefix; ?>-evento-card:hover{transform:translateY(-4px);box-shadow:0 6px 20px rgba(0,0,0,.12)}
+.<?php echo $prefix; ?>-evento-card img{width:100%;height:200px;object-fit:cover;display:block}
+.<?php echo $prefix; ?>-evento-card-body{padding:16px}
+.<?php echo $prefix; ?>-evento-card-body h4{font-size:.95rem;font-weight:700;text-transform:uppercase;margin:0 0 10px;color:#1a1a2e;line-height:1.4}
+.<?php echo $prefix; ?>-evento-card-body p{font-size:.88rem;color:#555;line-height:1.6;margin-bottom:14px}
+.<?php echo $prefix; ?>-evento-card-body a.btn-vermas{display:inline-block;padding:7px 16px;background:#1a6fa8;color:#fff;border-radius:4px;font-size:.85rem;text-decoration:none}
+
+.<?php echo $prefix; ?>-modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:99999;align-items:center;justify-content:center}
+.<?php echo $prefix; ?>-modal-overlay.open{display:flex}
+.<?php echo $prefix; ?>-modal-inner{position:relative;max-width:90vw;max-height:90vh}
+.<?php echo $prefix; ?>-modal-inner img{max-width:88vw;max-height:85vh;border-radius:4px;display:block}
+.<?php echo $prefix; ?>-modal-inner iframe{width:80vw;height:45vw;max-height:80vh;border:none;border-radius:4px;display:block}
+.<?php echo $prefix; ?>-modal-close{position:absolute;top:-36px;right:0;background:none;border:none;color:#fff;font-size:2rem;cursor:pointer}
+.<?php echo $prefix; ?>-modal-prev,.<?php echo $prefix; ?>-modal-next{position:fixed;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.15);border:none;color:#fff;font-size:2rem;padding:12px 18px;cursor:pointer;border-radius:4px;z-index:100000}
+.<?php echo $prefix; ?>-modal-prev{left:16px}
+.<?php echo $prefix; ?>-modal-next{right:16px}
+
+@media(max-width:768px){
+  .<?php echo $prefix; ?>-intro{flex-direction:column}
+  .<?php echo $prefix; ?>-eventos-grid{grid-template-columns:1fr}
+  .<?php echo $prefix; ?>-tab-btn{font-size:.8rem;padding:6px 10px}
+}
+</style>
+
+<?php if ($intro_html): ?>
+<div class="<?php echo $prefix; ?>-intro"><?php echo $intro_html; ?></div>
+<?php endif; ?>
+
+<div class="<?php echo $prefix; ?>-tabs-wrapper" id="<?php echo esc_attr($uid); ?>">
+  <div class="<?php echo $prefix; ?>-tabs-nav">
+    <?php foreach ($tabs as $i => $tab): ?>
+      <button class="<?php echo $prefix; ?>-tab-btn<?php echo $i === 0 ? ' active' : ''; ?>" data-tab="tab<?php echo $i; ?>">
+        <?php echo esc_html($tab['label']); ?>
+      </button>
+    <?php endforeach; ?>
+  </div>
+
+  <?php foreach ($tabs as $i => $tab): ?>
+    <div class="<?php echo $prefix; ?>-tab-panel<?php echo $i === 0 ? ' active' : ''; ?>" data-panel="tab<?php echo $i; ?>">
+
+      <?php if ($tab['type'] === 'images'): ?>
+        <div class="<?php echo $prefix; ?>-gallery" id="<?php echo esc_attr($uid . '_gal' . $i); ?>">
+          <?php foreach ($tab['items'] as $j => $img): ?>
+            <div class="<?php echo $prefix; ?>-gallery-item" data-gallery="<?php echo esc_attr($uid . '_gal' . $i); ?>" data-index="<?php echo $j; ?>">
+              <img src="<?php echo esc_url($img['src']); ?>" alt="<?php echo esc_attr($img['alt'] ?? ''); ?>" loading="lazy">
+            </div>
+          <?php endforeach; ?>
+        </div>
+
+      <?php elseif ($tab['type'] === 'videos'): ?>
+        <div class="<?php echo $prefix; ?>-videos-grid">
+          <?php foreach ($tab['items'] as $v): ?>
+            <div class="<?php echo $prefix; ?>-video-item" data-video-id="<?php echo esc_attr($v['id']); ?>">
+              <div class="<?php echo $prefix; ?>-video-thumb">
+                <img src="https://i.ytimg.com/vi/<?php echo esc_attr($v['id']); ?>/hqdefault.jpg" alt="<?php echo esc_attr($v['title']); ?>" loading="lazy">
+                <div class="<?php echo $prefix; ?>-video-play"><svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg></div>
+              </div>
+              <div class="<?php echo $prefix; ?>-video-title"><?php echo esc_html($v['title']); ?></div>
+            </div>
+          <?php endforeach; ?>
+        </div>
+
+      <?php elseif ($tab['type'] === 'posts'): ?>
+        <div class="<?php echo $prefix; ?>-eventos-grid">
+          <?php foreach ($tab['items'] as $item):
+            $post    = is_array($item) && isset($item['post']) ? $item['post'] : $item;
+            $thumb   = get_the_post_thumbnail_url($post->ID, 'medium');
+            if (empty($thumb) && is_array($item) && !empty($item['thumb'])) $thumb = $item['thumb'];
+            $excerpt = wp_trim_words(get_the_excerpt($post), 28, '...');
+            $url     = get_permalink($post->ID);
+          ?>
+            <div class="<?php echo $prefix; ?>-evento-card">
+              <?php if ($thumb): ?><img src="<?php echo esc_url($thumb); ?>" alt="<?php echo esc_attr($post->post_title); ?>"><?php endif; ?>
+              <div class="<?php echo $prefix; ?>-evento-card-body">
+                <h4><?php echo esc_html($post->post_title); ?></h4>
+                <p><?php echo esc_html($excerpt); ?></p>
+                <a class="btn-vermas" href="<?php echo esc_url($url); ?>">Ver mas...</a>
+              </div>
+            </div>
+          <?php endforeach; ?>
+        </div>
+      <?php elseif ($tab['type'] === 'content'): ?>
+        <div class="<?php echo $prefix; ?>-content-block">
+          <?php echo $tab['html']; ?>
+        </div>
+      <?php endif; ?>
+
+    </div>
+  <?php endforeach; ?>
+</div>
+
+<div class="<?php echo $prefix; ?>-modal-overlay" id="<?php echo esc_attr($uid); ?>_img_modal">
+  <button class="<?php echo $prefix; ?>-modal-prev" id="<?php echo esc_attr($uid); ?>_prev">&#8249;</button>
+  <div class="<?php echo $prefix; ?>-modal-inner">
+    <button class="<?php echo $prefix; ?>-modal-close" id="<?php echo esc_attr($uid); ?>_img_close">&times;</button>
+    <img src="" alt="" id="<?php echo esc_attr($uid); ?>_img_display">
+  </div>
+  <button class="<?php echo $prefix; ?>-modal-next" id="<?php echo esc_attr($uid); ?>_next">&#8250;</button>
+</div>
+<div class="<?php echo $prefix; ?>-modal-overlay" id="<?php echo esc_attr($uid); ?>_vid_modal">
+  <div class="<?php echo $prefix; ?>-modal-inner">
+    <button class="<?php echo $prefix; ?>-modal-close" id="<?php echo esc_attr($uid); ?>_vid_close">&times;</button>
+    <iframe id="<?php echo esc_attr($uid); ?>_vid_frame" src="" allowfullscreen allow="autoplay; encrypted-media"></iframe>
+  </div>
+</div>
+
+<script>
+(function(){
+  var uid=<?php echo json_encode($uid); ?>;
+
+  document.querySelectorAll('#'+uid+' .<?php echo $prefix; ?>-tab-btn').forEach(function(btn){
+    btn.addEventListener('click',function(){
+      document.querySelectorAll('#'+uid+' .<?php echo $prefix; ?>-tab-btn').forEach(function(b){b.classList.remove('active')});
+      document.querySelectorAll('#'+uid+' .<?php echo $prefix; ?>-tab-panel').forEach(function(p){p.classList.remove('active')});
+      btn.classList.add('active');
+      document.querySelector('#'+uid+' [data-panel="'+btn.getAttribute('data-tab')+'"]').classList.add('active');
+    });
+  });
+
+  var imgModal=document.getElementById(uid+'_img_modal');
+  var imgDisplay=document.getElementById(uid+'_img_display');
+  var currentGallery=[],currentIndex=0;
+  document.querySelectorAll('#'+uid+' .<?php echo $prefix; ?>-gallery-item').forEach(function(item){
+    item.addEventListener('click',function(){
+      var galId=item.getAttribute('data-gallery');
+      currentIndex=parseInt(item.getAttribute('data-index'));
+      currentGallery=Array.from(document.querySelectorAll('[data-gallery="'+galId+'"] img')).map(function(i){return{src:i.src,alt:i.alt}});
+      imgDisplay.src=currentGallery[currentIndex].src;
+      imgDisplay.alt=currentGallery[currentIndex].alt;
+      imgModal.classList.add('open');
+      document.getElementById(uid+'_prev').style.display=currentGallery.length>1?'':'none';
+      document.getElementById(uid+'_next').style.display=currentGallery.length>1?'':'none';
+    });
+  });
+  document.getElementById(uid+'_img_close').addEventListener('click',function(){imgModal.classList.remove('open')});
+  imgModal.addEventListener('click',function(e){if(e.target===imgModal)imgModal.classList.remove('open')});
+  document.getElementById(uid+'_prev').addEventListener('click',function(){currentIndex=(currentIndex-1+currentGallery.length)%currentGallery.length;imgDisplay.src=currentGallery[currentIndex].src;imgDisplay.alt=currentGallery[currentIndex].alt});
+  document.getElementById(uid+'_next').addEventListener('click',function(){currentIndex=(currentIndex+1)%currentGallery.length;imgDisplay.src=currentGallery[currentIndex].src;imgDisplay.alt=currentGallery[currentIndex].alt});
+
+  var vidModal=document.getElementById(uid+'_vid_modal');
+  var vidFrame=document.getElementById(uid+'_vid_frame');
+  document.querySelectorAll('#'+uid+' .<?php echo $prefix; ?>-video-item').forEach(function(item){
+    item.addEventListener('click',function(){
+      vidFrame.src='https://www.youtube-nocookie.com/embed/'+item.getAttribute('data-video-id')+'?autoplay=1&rel=0';
+      vidModal.classList.add('open');
+    });
+  });
+  document.getElementById(uid+'_vid_close').addEventListener('click',function(){vidModal.classList.remove('open');vidFrame.src=''});
+  vidModal.addEventListener('click',function(e){if(e.target===vidModal){vidModal.classList.remove('open');vidFrame.src=''}});
+
+  document.addEventListener('keydown',function(e){if(e.key==='Escape'){imgModal.classList.remove('open');vidModal.classList.remove('open');vidFrame.src=''}});
+})();
+</script>
+    <?php
+    return ob_get_clean();
+}
