@@ -65,7 +65,7 @@ add_action('wp_footer', function() {
 });
 
 add_shortcode('directorio_tabs', function() {
-    $page = get_page_by_path('directorio');
+    $page = get_page_by_path('quienes-somos/directorio-datos');
     if (!$page) return '<p>No se encontro la pagina Directorio.</p>';
 
     $content = wpautop($page->post_content);
@@ -79,16 +79,19 @@ add_shortcode('directorio_tabs', function() {
 
     ob_start();
     echo '<style>
-    .dir-wrap{display:flex;gap:0;max-width:1200px;margin:0 auto;padding:32px;align-items:flex-start}
+    .dir-wrap{display:flex;gap:0;max-width:1200px;margin:0 auto;padding:0;align-items:stretch}
     .dir-menu{min-width:240px;width:240px;border:1px solid #e0e0e0;border-radius:8px 0 0 8px;overflow:hidden;background:#fff}
     .dir-menu-item{display:block;padding:13px 18px;cursor:pointer;font-size:.88rem;color:#1a1a2e;border-bottom:1px solid #eee;transition:all .2s;text-decoration:none;line-height:1.3}
     .dir-menu-item:last-child{border-bottom:none}
     .dir-menu-item:hover{background:#f0f4ff;color:#2563eb}
-    .dir-menu-item.active{background:#1a3a4a;color:#fff;font-weight:700}
+    .dir-menu-item.active{background:#3d8fb5;color:#fff;font-weight:700}
     .dir-content{flex:1;border:1px solid #e0e0e0;border-left:none;border-radius:0 8px 8px 0;background:#f9f9f9;min-height:400px}
     .dir-section{display:none;padding:28px 32px}
     .dir-section.active{display:block}
-    .dir-section-title{font-size:1.15rem;font-weight:700;color:#1a3a4a;margin:0 0 20px;padding-bottom:12px;border-bottom:2px solid #e0e0e0}
+    .dir-section{column-count:2;column-gap:32px}
+    .dir-section p{break-inside:avoid;margin:0 0 14px}
+    @media(max-width:900px){.dir-section{column-count:1}}
+    .dir-section-title{font-size:1.15rem;font-weight:700;color:#1a3a4a;margin:0 0 20px;padding-bottom:12px;border-bottom:2px solid #e0e0e0;column-span:all}
     .dir-section p{margin:0 0 14px;font-size:.9rem;line-height:1.7;color:#333}
     .dir-section a{color:#2563eb;text-decoration:none}
     .dir-section a:hover{text-decoration:underline}
@@ -97,7 +100,8 @@ add_shortcode('directorio_tabs', function() {
         .dir-menu{width:100%;border-radius:8px 8px 0 0}
         .dir-content{border-left:1px solid #e0e0e0;border-top:none;border-radius:0 0 8px 8px;min-height:auto}
     }
-    </style>';
+    .dir-menu-item, .dir-menu-item:hover, .dir-menu-item:visited{text-decoration:none !important}</style>';
+    echo '<div style="margin:16px 0;padding:12px 20px;background:#f0f7fb;border-left:4px solid #3d8fb5;border-radius:6px;display:flex;align-items:center;flex-wrap:wrap;gap:6px;font-size:.88rem;color:#1a3a4a"><strong>📞 Conmutador General:</strong> <a href="tel:+529676786921" style="color:#3d8fb5;font-weight:600">(+52) 967-6786921</a> &middot; <a href="tel:9671120483" style="color:#3d8fb5">967-1120483</a> &middot; <a href="tel:9671120484" style="color:#3d8fb5">967-1120484</a> &middot; <a href="tel:9671120485" style="color:#3d8fb5">967-1120485</a> — marca la extensión deseada</div>';
 
     echo '<div class="dir-wrap"><div class="dir-menu">';
     foreach($titles as $i => $title) {
@@ -864,3 +868,11 @@ function cesmeca_render_gallery_tabs($args) {
     <?php
     return ob_get_clean();
 }
+
+// Redirigir la página de datos del directorio a la página pública con pestañas
+add_action('template_redirect', function() {
+    if (is_page(1554)) {
+        wp_redirect(home_url('/quienes-somos/directorio/'), 301);
+        exit;
+    }
+});
