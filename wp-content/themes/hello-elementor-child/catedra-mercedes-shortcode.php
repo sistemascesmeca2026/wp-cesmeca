@@ -41,15 +41,18 @@ function catedra_mercedes_shortcode() {
     ob_start();
     ?>
     <div class="merc-intro-text">
-      <h3>Descripcion</h3>
-      <p>La Catedra de Estudios de Genero y Feminismos "Mercedes Olivera" nacio en 2013, en el marco de los Posgrados en Estudios e Intervencion Feministas, con el proposito de articular la vida academica e intelectual universitaria con la sociedad civil y las organizaciones sociales de Chiapas, la region sur-sureste de Mexico, Centroamerica y el Caribe.</p>
-      <p>Desde 2022, la Catedra se ha enfocado en generar espacios de dialogo que fortalezcan los vinculos con los feminismos de los Sures Globales. Con el fin de continuar este giro epistemico, hemos invitado a colegas y referentes de estos feminismos para enriquecer la articulacion teorico-politica que impulsa nuestro trabajo.</p>
-      <p>En 2025 contamos con la presencia de la Dra. Mara Viveros Vigoya, destacada pensadora feminista colombiana, quien visitara el Centro de Estudios Superiores de Mexico y Centroamerica (CESMECA). Su participacion nos permitira reflexionar colectivamente sobre la comprension del Sur Global y el lugar de la interseccionalidad dentro de los feminismos contemporaneos.</p>
-      <p>El programa lleva por nombre "Los Feminismos del Sur con...", un titulo pensado para construir un marco de dialogos epistemicos desde la Catedra.</p>
+      <h3>Descripción</h3>
+      <p>La Cátedra de Estudios de Género y Feminismos "Mercedes Olivera" nació en 2013, en el marco de los Posgrados en Estudios e Intervención Feministas, con el propósito de articular la vida académica e intelectual universitaria con la sociedad civil y las organizaciones sociales de Chiapas, la región sur-sureste de México, Centroamérica y el Caribe.</p>
+      <p>Desde 2022, la Cátedra se ha enfocado en generar espacios de diálogo que fortalezcan los vínculos con los feminismos de los Sures Globales. Con el fin de continuar este giro epistémico, hemos invitado a colegas y referentes de estos feminismos para enriquecer la articulación teórico-política que impulsa nuestro trabajo.</p>
+      <p>En 2025 contamos con la presencia de la Dra. Mara Viveros Vigoya, destacada pensadora feminista colombiana, quien visitará el Centro de Estudios Superiores de México y Centroamérica (CESMECA). Su participación nos permitirá reflexionar colectivamente —corazonar— sobre la comprensión del Sur Global y el lugar de la interseccionalidad dentro de los feminismos contemporáneos.</p>
+      <p>El programa lleva por nombre "Los Feminismos del Sur con…", un título pensado para construir un marco de diálogos epistémicos desde la Cátedra. Cada invitada forma parte del margen epistémico del Sur, y consideramos que estos espacios de formación, basados en dichas epistemologías, fortalecen y distinguen la propuesta académica del posgrado.</p>
+      <p>La Dra. Mara Viveros Vigoya es profesora del Departamento de Antropología y de la Escuela de Estudios de Género de la Universidad Nacional de Colombia. Su trabajo se ha centrado en los estudios de género, la perspectiva interseccional, la raza y la sexualidad, así como en el análisis de las clases medias negras en Colombia, entre otros temas relevantes.</p>
       <h3>Coordinadora</h3>
-      <p>Dra. Delmy Tania Cruz Hernandez</p>
-      <h3>Retribucion Social</h3>
+      <p>Dra. Delmy Tania Cruz Hernández</p>
+      <h3>Retribución Social</h3>
       <p>Larissa Fuentes Machorro</p>
+      <h3>Comité</h3>
+      <p>En conformación</p>
     </div>
     <div class="merc-intro-img">
       <img src="/wp-content/uploads/cesmeca-legacy/actualizacion_2025/catedra_mercedes_olivera/LOGO.png" alt="Catedra Mercedes Olivera">

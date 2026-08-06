@@ -41,16 +41,16 @@ function catedra_marti_shortcode() {
     ob_start();
     ?>
     <div class="marti-intro-text">
-      <h3>Descripcion</h3>
-      <p>En enero de 2014 el CESMECA impulso la creacion de la Catedra de Pensamiento Social Jose Marti, cuyo objetivo responde al compromiso universitario de fortalecer la vinculacion y extension de los conocimientos, saberes y reflexiones que derivan del pensamiento social, politico, cultural y humanistico de Nuestra America-Abya Yala.</p>
-      <p>El CESMECA, a traves de esta Catedra de Pensamiento Social y situado desde Centroamerica, el Caribe y el area sur sureste de Mexico, mira, interpela y reflexiona desde una mirada historica la contemporaneidad de los problemas sociales que aquejan a la region, ademas de que reconoce criticamente las virtudes de los pensamientos latinoamericanos y caribenos que han tejido la configuracion cultural de nuestros pueblos.</p>
-      <p>Para ello, impulsa conferencias magistrales, seminarios especializados, coloquios y talleres con destacados intelectuales, academicas y academicos de la region.</p>
+      <h3>Descripción</h3>
+      <p>En enero de 2014 el CESMECA impulsó la creación de la Cátedra de Pensamiento Social José Martí, cuyo objetivo responde al compromiso universitario de fortalecer la vinculación y extensión de los conocimientos, saberes y reflexiones que derivan del pensamiento social, político, cultural y humanístico de Nuestra América-Abya Yala.</p>
+      <p>El CESMECA, a través de esta Cátedra de Pensamiento Social y situado desde Centroamérica, el Caribe y el área sur sureste de México, mira, interpela y reflexiona desde una mirada histórica la contemporaneidad de los problemas sociales que aquejan a la región, además de que reconoce críticamente las virtudes de los pensamientos latinoamericanos y caribeños que han tejido la configuración cultural de nuestros pueblos.</p>
+      <p>Para ello, impulsa conferencias magistrales, seminarios especializados, coloquios y talleres con destacados intelectuales, académicas y académicos de la región.</p>
       <h3>Coordinador e integrantes</h3>
-      <p>Consejo Honorifico:<br>
-      Gilberto Valdes (Instituto de Filosofia de La Habana y GALFISA, Cuba)<br>
-      Jaime Preciado Coronado (Universidad de Guadalajara, Mexico)<br>
-      Luciano Concheiro (Universidad Autonoma de Mexico-Xochimilco, Mexico)<br>
-      Sergio Ramirez (Narrador, ensayista, periodista, politico y abogado nicaraguense)</p>
+      <p>Consejo Honorífico:<br>
+      Gilberto Valdes (Instituto de Filosofía de La Habana y GALFISA, Cuba)<br>
+      Jaime Preciado Coronado (Universidad de Guadalajara, México)<br>
+      Luciano Concheiro (Universidad Autónoma de México-Xochimilco, México)<br>
+      Sergio Ramírez (Narrador, ensayista, periodista, político y abogado nicaragüense)</p>
     </div>
     <div class="marti-intro-img">
       <img src="/wp-content/uploads/cesmeca-legacy/catedras_laboratorios/Ctedr_Jos_Mart_Negro_Mesa_de_trabajo_1.png" alt="Catedra Jose Marti">

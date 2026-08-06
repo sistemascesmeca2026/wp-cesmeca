@@ -25,15 +25,15 @@ function eac_page_shortcode() {
     ob_start();
     ?>
     <div class="eac-intro-text">
-      <p>El seminario interinstitucional de enfoques alternativos y criticos para el desarrollo comunitario es un proyecto permanente que busca integrar aprendizajes hacia un enfoque interdisciplinario y territorial entre los participantes. Se propone para su operacion a la modalidad mixta y con una frecuencia mensual en el que participan actualmente siete instituciones de la region sur-sureste: Centro de Investigacion para el Desarrollo Sustentable (CIDES), Benemerita Universidad Autonoma de Chiapas (Unach), Instituto Tecnologico de Acapulco (ITA), Universidad Autonoma de Ciencias y Artes de Chiapas (Unicach), Universidad Intercultural de Chiapas (Unich), Universidad de la Sierra Juarez (Unsij) y Universidad Politecnica de Chiapas (Upch).</p>
-      <p>Estas instituciones se encuentran interesadas en la conformacion de una red academica de apoyo e intercambio de experiencias y aprendizajes para la transformacion regional de las comunidades locales desde la promocion del acceso universal al conocimiento y la promocion de los principios de interculturalidad, justicia social, equidad, igualdad, solidaridad, sustentabilidad, paz e inclusion.</p>
-      <h3>Proposito</h3>
-      <p>Propiciar el dialogo comunitario, academico e investigativo para la comprension de enfoques criticos y alternativos para el desarrollo comunitario.</p>
+      <p>El seminario interinstitucional de enfoques alternativos y críticos para el desarrollo comunitario es un proyecto permanente que busca integrar aprendizajes hacia un enfoque interdisciplinario y territorial entre los participantes. Se propone para su operación a la modalidad mixta y con una frecuencia mensual en el que participan actualmente siete instituciones de la región sur-sureste: Centro de Investigación para el Desarrollo Sustentable (CIDES), Benemérita Universidad Autónoma de Chiapas (Unach), Instituto Tecnológico de Acapulco (ITA), Universidad Autónoma de Ciencias y Artes de Chiapas (Unicach), Universidad Intercultural de Chiapas (Unich), Universidad de la Sierra Juárez (Unsij) y Universidad Politécnica de Chiapas (Upch).</p>
+      <p>Estas instituciones se encuentran interesadas en la conformación de una red académica de apoyo e intercambio de experiencias y aprendizajes para la transformación regional de las comunidades locales desde la promoción del acceso universal al conocimiento y la promoción de los principios de interculturalidad, justicia social, equidad, igualdad, solidaridad, sustentabilidad, paz e inclusión.</p>
+      <h3>Propósito</h3>
+      <p>Propiciar el diálogo comunitario, académico e investigativo para la comprensión de enfoques críticos y alternativos para el desarrollo comunitario.</p>
       <h3>Registro validado</h3>
-      <p>AEC-001/2025, por el Departamento de Educacion Continua de la Secretaria Academica de la Universidad Autonoma de Ciencias y Artes de Chiapas, con fecha de 9 de enero de 2025.</p>
-      <h3>Coordinacion general</h3>
+      <p>AEC-001/2025, por el Departamento de Educación Continua de la Secretaría Académica de la Universidad Autónoma de Ciencias y Artes de Chiapas, con fecha de 9 de enero de 2025.</p>
+      <h3>Coordinación general</h3>
       <p>Dra. Nelly Eblin Barrientos Gutierrez<br>Investigadora por Mexico comisionada<br><a href="mailto:negutierrezgu@secihti.mx">negutierrezgu@secihti.mx</a></p>
-      <h3>Comite organizador</h3>
+      <h3>Comité organizador</h3>
       <p>Dr. Amin Andres Miceli Ruiz (Unicach)<br>Dr. Domingo Gomez Lopez (Unich)<br>Dra. Elisa Cruz Rueda (Unach)<br>Dr. Juan Jose Bedolla Solano (ITA)<br>Dra. Maria Jane Rivas Damian (Cides)<br>Dr. Mario Enrique Fuente Carrasco (Unsij)<br>Dra. Nelly Eblin Barrientos Gutierrez (Secihti-Cesmeca)<br>Dr. Roberto Berrones Hernandez (Upch)</p>
       <h3>Correo de informes</h3>
       <p><a href="mailto:proyectocir0352024@gmail.com">proyectocir0352024@gmail.com</a></p>

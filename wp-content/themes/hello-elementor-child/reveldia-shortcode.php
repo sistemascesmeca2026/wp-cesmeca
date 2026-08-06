@@ -46,8 +46,8 @@ function reveldia_page_shortcode() {
     ob_start();
     ?>
     <div class="rev-intro-text">
-      <p>Seminario Permanente de Investigacion Feminista "Sembrar ReVeldia" busca dar a conocer a la comunidad academica y militante del sureste mexicano diversas trayectorias investigativas, asi como investigaciones concluidas o en curso, que aporten lineamientos para nutrir las discusiones que sentipensamos como necesarias en nuestro contexto actual.</p>
-      <p>Este seminario convoca al dialogo entre academicas de alto nivel, estudiantes del Posgrado en Estudios e Intervencion Feministas, asi como otras personas interesadas en adquirir herramientas para la investigacion-accion feminista desde una perspectiva del Sur.</p>
+      <p>Seminario Permanente de Investigación Feminista "Sembrar ReVeldía" busca dar a conocer a la comunidad académica y militante del sureste mexicano diversas trayectorias investigativas, así como investigaciones concluidas o en curso, que aporten lineamientos para nutrir las discusiones que sentipensamos como necesarias en nuestro contexto actual.</p>
+      <p>Este seminario convoca al diálogo entre académicas de alto nivel, estudiantes del Posgrado en Estudios e Intervención Feministas, así como otras personas interesadas en adquirir herramientas para la investigación-acción feminista desde una perspectiva del Sur.</p>
       <h3>Objetivos</h3>
       <p>1. Construir una plataforma de difusion y divulgacion para la comunidad de feministas del Sur, para dar cuenta del estado actual del arte de la investigacion feminista de Chiapas, Centroamerica y Latinoamerica.<br>
       2. Aportar a la construccion de redes de conocimiento, accion politica y acuerpamiento que incluya estudiantes, investigadoras y activistas de Chiapas, Centroamerica y Latinoamerica.</p>

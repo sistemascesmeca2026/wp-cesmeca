@@ -653,14 +653,13 @@ main.category-concejo-academico .single-featured-img {
 .posg-header-text{flex:2}
 .posg-header-img{flex:1;text-align:center}
 .posg-header-img img{max-width:100%;border-radius:6px}
-.posg-tabs-nav{display:flex;flex-wrap:wrap;border-bottom:2px solid #ddd;margin-bottom:24px;gap:4px}
-.posg-tab-btn{padding:7px 14px;background:#5dade2;border:1px solid #ddd;border-bottom:none;cursor:pointer;font-size:.85rem;color:#fff;border-radius:4px 4px 0 0;transition:background .2s}
-.posg-tab-btn:focus{background:#5dade2!important;color:#fff!important;text-decoration:none}
-.posg-tab-btn:hover{background:#5dade2!important;color:#fff!important;text-decoration:none}
-.posg-tab-btn.active{background:#3498db!important;color:#fff!important;font-weight:600;border-bottom:2px solid #3498db;margin-bottom:-2px}
-.posg-tab-btn.active:hover,.posg-tab-btn.active:focus{background:#3498db!important;color:#fff!important}
-.posg-tab-panel{display:none;padding:20px 0}.posg-tab-panel.active{display:block}
-.posg-tabs-wrapper{border:1px solid #e0e0e0!important;border-radius:8px!important;padding:24px!important;box-shadow:0 2px 10px rgba(0,0,0,.06)!important}
+.posg-tabs-wrapper{display:flex;align-items:stretch;border:1px solid #e0e0e0!important;border-radius:8px!important;padding:0!important;box-shadow:0 2px 10px rgba(0,0,0,.06)!important;overflow:hidden}
+.posg-tabs-nav{display:flex;flex-direction:column;width:260px;min-width:260px;background:#fff;border-right:1px solid #e0e0e0;gap:0}
+.posg-tab-btn{display:block;width:100%;text-align:left;padding:12px 16px;background:#fff;border:none;border-bottom:1px solid #eee;cursor:pointer;font-size:.85rem;color:#1a1a2e;border-radius:0;transition:background .2s}
+.posg-tab-btn:focus,.posg-tab-btn:hover{background:#f0f4ff!important;color:#1a1a2e!important;text-decoration:none}
+.posg-tab-btn.active{background:#3d8fb5!important;color:#fff!important;font-weight:700;border-bottom:1px solid #eee;margin-bottom:0}
+.posg-tab-btn.active:hover,.posg-tab-btn.active:focus{background:#3d8fb5!important;color:#fff!important}
+.posg-tab-panel{display:none;padding:24px 28px;flex:1}.posg-tab-panel.active{display:block}
 .posg-tab-panel p{font-size:.97rem;line-height:1.7;text-align:justify;color:#333;margin-bottom:12px}
 .posg-tab-panel ul,.posg-tab-panel ol{padding-left:24px;font-size:.97rem;line-height:1.7;color:#333;margin-bottom:12px}
 .posg-tab-panel li{margin-bottom:6px}
@@ -673,7 +672,7 @@ main.category-concejo-academico .single-featured-img {
 body .page-content .posg-tab-panel a[href$=".pdf"]{display:inline!important;background:none!important;color:#2563eb!important;padding:0!important;margin:0!important;border-radius:0!important;font-weight:400!important}
 body .page-content .posg-tab-panel a[href$=".pdf"]:hover{background:none!important;text-decoration:underline!important}
 .posg-tab-panel a{color:#2563eb}
-@media(max-width:768px){.posg-header{flex-direction:column}.posg-tab-btn{font-size:.78rem;padding:5px 8px}}
+@media(max-width:768px){.posg-header{flex-direction:column}.posg-tabs-wrapper{flex-direction:column}.posg-tabs-nav{width:100%;min-width:100%;flex-direction:row;flex-wrap:wrap;border-right:none;border-bottom:1px solid #e0e0e0}.posg-tab-btn{width:auto;font-size:.78rem;padding:8px 12px;border-bottom:1px solid #eee}.posg-tab-panel{flex:1 1 auto}}
 
 /* Fix: contenido de Elementor se desbordaba en landscape/tablet en paginas con builder activo (Consejo Academico, Directorio, Normativa interna) */
 html, body {
