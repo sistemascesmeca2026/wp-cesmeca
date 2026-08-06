@@ -13,6 +13,7 @@ function inicio_page_shortcode() {
 <style>
 /* ===== RESET & BASE ===== */
 .home-wrap{max-width:100%;overflow-x:hidden;font-family:inherit}
+.page-content{margin-bottom:0!important;padding-bottom:0!important}
 .home-section{padding:48px 24px;max-width:1400px;margin:0 auto}
 .home-section-title{font-size:1.2rem;font-weight:700;color:#1a1a2e;text-transform:uppercase;letter-spacing:1px;margin-bottom:24px;display:flex;align-items:center;gap:10px}
 .home-section-title::after{content:'';flex:1;height:2px;background:#2563eb;margin-left:8px}
@@ -92,7 +93,7 @@ function inicio_page_shortcode() {
 .repo-banner img{width:100%;display:block}
 
 /* ===== REDES SOCIALES ===== */
-.redes-section{text-align:center;padding:32px 24px;background:#f8f9fa}
+.redes-section{text-align:center;padding:32px 24px 0;background:#f8f9fa}
 .redes-section p{font-size:.95rem;color:#555;margin-bottom:16px}
 .redes-icons{display:flex;justify-content:center;gap:24px}
 .redes-icons a{color:#1a1a2e;font-size:1.8rem;text-decoration:none;transition:color .2s}
@@ -174,6 +175,7 @@ function inicio_page_shortcode() {
 <div class="home-wrap">
 
 <!-- AGENDA ACADÉMICA -->
+<div style="background:#f8f9fa;padding:1px 0">
 <div class="home-section">
   <div class="home-section-title">📅 <span>Agenda</span> Académica</div>
   <div class="agenda-slider-outer">
@@ -205,6 +207,21 @@ function inicio_page_shortcode() {
   </div>
 </div>
 
+</div>
+<!-- ACTIVIDADES PERMANENTES -->
+<div class="home-section">
+  <div class="home-section-title">🔁 <span>Actividades</span> Permanentes</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:24px">
+    <a href="<?php echo esc_url(get_permalink(1696)); ?>" style="text-decoration:none;color:inherit;border:1px solid #e0e0e0;border-radius:8px;overflow:hidden;display:block;transition:box-shadow .2s" onmouseover="this.style.boxShadow='0 4px 16px rgba(0,0,0,.12)'" onmouseout="this.style.boxShadow='none'">
+      <div style="height:180px;overflow:hidden"><img src="/wp-content/uploads/cesmeca-legacy/2025/10/23/532943453_1328453309286259_2750706717610870999_n.jpg" alt="Seminario Permanente de Historia de Chiapas y Centroamérica" style="width:100%;height:100%;object-fit:cover"></div>
+      <div style="padding:16px"><div style="font-weight:700;font-size:.95rem;color:#1a1a2e">Seminario Permanente de Historia de Chiapas y Centroamérica</div></div>
+    </a>
+    <a href="<?php echo esc_url(get_permalink(1700)); ?>" style="text-decoration:none;color:inherit;border:1px solid #e0e0e0;border-radius:8px;overflow:hidden;display:block;transition:box-shadow .2s" onmouseover="this.style.boxShadow='0 4px 16px rgba(0,0,0,.12)'" onmouseout="this.style.boxShadow='none'">
+      <div style="height:180px;overflow:hidden"><img src="/wp-content/uploads/cesmeca-legacy/actualizacion_2025/desarrollo_comunitario/493728989_1233002238831367_8338653192214803408_n.jpg" alt="Seminario Interinstitucional EAC" style="width:100%;height:100%;object-fit:cover"></div>
+      <div style="padding:16px"><div style="font-weight:700;font-size:.95rem;color:#1a1a2e">Seminario Interinstitucional de Enfoques Alternativos y Críticos para el Desarrollo Comunitario (EAC)</div></div>
+    </a>
+  </div>
+</div>
 <!-- NOTAS INFORMATIVAS -->
 <div style="background:#f8f9fa;padding:1px 0">
 <div class="home-section">
