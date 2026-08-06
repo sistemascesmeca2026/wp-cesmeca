@@ -17,15 +17,15 @@ function odemca_page_shortcode() {
 @media(max-width:768px){.odemca-tab-btn{font-size:.8rem;padding:6px 10px}}
 </style>
 <div class="odemca-wrap">
-  <h2>Observatorio de las Democracias: Sur de Mexico y Centroamerica (ODEMCA)</h2>
+  <h2>Observatorio de las Democracias: Sur de México y Centroamérica (ODEMCA)</h2>
   <div class="odemca-tabs-wrapper" id="<?php echo esc_attr($uid); ?>">
     <div class="odemca-tabs-nav">
       <button class="odemca-tab-btn active" data-tab="desc">Descripcion</button>
       <button class="odemca-tab-btn" data-tab="int">Coordinador e integrantes</button>
     </div>
     <div class="odemca-tab-panel active" data-panel="desc">
-      <p class="odemca-desc">El Observatorio de las Democracias: Sur de Mexico y Centroamerica (ODEMCA) es un grupo de investigacion con sede en el CESMECA-UNICACH que surgio en el ano 2014. Su proposito es el desarrollo de investigaciones academicas, analisis de coyuntura y monitoreo geopolitico de los procesos politicos y sociales en los que se desenvuelven las democracias en el sur de Mexico y Centroamerica. Las democracias son interpretadas como una expresion de los gobiernos, poderes e instituciones de los Estados, asi como de las practicas que emergen desde la sociedad civil y los movimientos sociales para el ordenamiento popular, el autogobierno y la autodeterminacion (democracias otras).</p>
-      <p class="odemca-desc">Anualmente el ODEMCA convoca el Foro Social sobre Democracias Otras al que acuden organizaciones y movimientos sociales del sur de Mexico y Centroamerica para compartir su agenda politica y sus interpretaciones en torno a las democracias alternativas.</p>
+      <p class="odemca-desc">El Observatorio de las Democracias: Sur de México y Centroamérica (ODEMCA) es un grupo de investigación con sede en el CESMECA-UNICACH que surgió en el año 2014. Su propósito es el desarrollo de investigaciones académicas, análisis de coyuntura y monitoreo geopolítico de los procesos políticos y sociales en los que se desenvuelven las democracias en el sur de México y Centroamérica. Las democracias son interpretadas como una expresión de los gobiernos, poderes e instituciones de los Estados, así como de las prácticas que emergen desde la sociedad civil y los movimientos sociales para el ordenamiento popular, el autogobierno y la autodeterminación (democracias otras).</p>
+      <p class="odemca-desc">Anualmente el ODEMCA convoca el Foro Social sobre Democracias Otras al que acuden organizaciones y movimientos sociales del sur de México y Centroamérica para compartir su agenda política y sus interpretaciones en torno a las democracias alternativas.</p>
       <div class="odemca-cintillo">
         <a href="http://observatoriodemocracia.cesmeca.mx/" target="_blank">
           <img src="/wp-content/uploads/cesmeca-legacy/cintillo.png" alt="Observatorio de las Democracias ODEMCA">

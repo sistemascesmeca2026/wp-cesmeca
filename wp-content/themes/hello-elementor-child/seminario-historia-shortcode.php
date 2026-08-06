@@ -16,19 +16,19 @@ function seminario_historia_shortcode() {
     $agenda = array_map(function($p) { return ['src' => $p[0], 'alt' => $p[1]]; }, $agenda_raw);
 
     $videos = [
-        ['id' => '9tbQ_-U76NY', 'title' => 'Seminario Permanente de Historia de Chiapas y Centroamerica'],
+        ['id' => '9tbQ_-U76NY', 'title' => 'Seminario Permanente de Historia de Chiapas y Centroamérica'],
     ];
 
     ob_start();
     ?>
     <div class="semhist-intro-text">
       <h3>Descripcion</h3>
-      <p>El Seminario Permanente de Historia de Chiapas y Centroamerica se trata de un esfuerzo interinstitucional en el que participan estudiosos de la historia (profesores y estudiantes de posgrado) adscritos a las siguientes instancias academicas de San Cristobal de Las Casas, Chiapas:</p>
-      <p>- El Centro de Estudios Superiores de Mexico y Centroamerica de la Universidad de Ciencias y Artes de Chiapas (CESMECA-UNICACH).<br>
-      - El Centro de investigaciones Multidisciplinarias sobre Chiapas y Centroamerica de la Universidad Nacional Autonoma de Mexico (CIMSUR-UNAM).<br>
+      <p>El Seminario Permanente de Historia de Chiapas y Centroamérica se trata de un esfuerzo interinstitucional en el que participan estudiosos de la historia (profesores y estudiantes de posgrado) adscritos a las siguientes instancias académicas de San Cristóbal de Las Casas, Chiapas:</p>
+      <p>- El Centro de Estudios Superiores de México y Centroamérica de la Universidad de Ciencias y Artes de Chiapas (CESMECA-UNICACH).<br>
+      - El Centro de investigaciones Multidisciplinarias sobre Chiapas y Centroamérica de la Universidad Nacional Autónoma de México (CIMSUR-UNAM).<br>
       - El Centro de Investigaciones y Estudios Superiores en Antropologia Social (CIESAS) Unidad Sureste.</p>
       <p>Quienes participan en el seminario se reunen una vez al mes desde su creacion, en abril de 2016.</p>
-      <p>El objetivo principal del seminario es conocer los campos de investigacion de cada integrante, compartir el analisis de la historia que se estudia en la region, y, a partir del analisis colectivo por pares de los trabajos, incrementar la calidad y el alcance de los aportes de investigacion que redunde en beneficio de la historia regional. Asimismo, se coordinan eventos academicos vinculados con investigaciones sobre historia de Chiapas y de America Central.</p>
+      <p>El objetivo principal del seminario es conocer los campos de investigación de cada integrante, compartir el análisis de la historia que se estudia en la región, y, a partir del análisis colectivo por pares de los trabajos, incrementar la calidad y el alcance de los aportes de investigación que redunde en beneficio de la historia regional. Asimismo, se coordinan eventos académicos vinculados con investigaciones sobre historia de Chiapas y de América Central.</p>
       <h3>Coordinadores</h3>
       <p>- Dr. Aaron Pollack (CIESAS Unidad Sureste)<br>
       - Dr. Mario E. Valdez Gordillo (CESMECA)<br>
@@ -41,7 +41,7 @@ function seminario_historia_shortcode() {
         'prefix' => 'semhist',
         'intro_html' => $intro_html,
         'tabs' => [
-            ['label' => 'Agenda academica', 'type' => 'images', 'items' => $agenda],
+            ['label' => 'Agenda académica', 'type' => 'images', 'items' => $agenda],
             ['label' => 'Videos', 'type' => 'videos', 'items' => $videos],
         ],
     ]);

@@ -23,7 +23,7 @@ function lacem_page_shortcode() {
         ['id'=>'_O0nWJGQvt4','title'=>'El Salvador en datos: uso y disponibilidad de fuentes geograficas y estadisticas (1)'],
         ['id'=>'kE8vWPmQapo','title'=>'El Salvador en datos: uso y disponibilidad de fuentes geograficas y estadisticas (2)'],
         ['id'=>'l8XxyJSpoQA','title'=>'El Salvador en datos: uso y disponibilidad de fuentes geograficas y estadisticas (3)'],
-        ['id'=>'ri12Kv5OU90','title'=>'Foro: Sistemas de informacion geografica historicos: reinterpretar el pasado con mapas del presente'],
+        ['id'=>'ri12Kv5OU90','title'=>'Foro: Sistemas de información geográfica históricos: reinterpretar el pasado con mapas del presente'],
     ];
     $actividades_2021 = [
         ['src'=>'/wp-content/uploads/cesmeca-legacy/2019/00/Conferencia_Aztecas_en_la_nube_de_puntos_.jpg','alt'=>'Aztecas en la nube de puntos'],
@@ -44,16 +44,16 @@ function lacem_page_shortcode() {
     <div class="lacem-intro-text">
       <h1>Laboratorio de Cartografia y Elaboracion de Mapas (LACEM)</h1>
       <h3>Presentacion</h3>
-      <p>El LACEM se establecio en 2015 con el objetivo principal de dotar a los proyectos de investigacion desarrollados en el CESMECA, del entorno de trabajo y las herramientas que les posibiliten desplegar sus tematicas de manera espacial por medio de representaciones cartograficas de alta calidad. Ademas de ser considerado como un espacio de creacion, edicion, acopio y difusion de mapas digitales, como fisicos, especialmente de tematicas relacionadas con las ciencias sociales y humanidades.</p>
-      <p>De este modo, en la linea de investigacion aplicada: <strong>Perspectivas globales en la historia de Chiapas, Centroamerica y el Caribe, epocas moderna y contemporanea</strong>, buscamos reorganizar las actividades y funciones del laboratorio, con el fin de mantener los objetivos de este espacio y potenciar el trabajo colaborativo con estudiantes, investigadores, centros publicos CONACyT e institucionales de la UNICACH.</p>
+      <p>El LACEM se estableció en 2015 con el objetivo principal de dotar a los proyectos de investigación desarrollados en el CESMECA, del entorno de trabajo y las herramientas que les posibiliten desplegar sus temáticas de manera espacial por medio de representaciones cartográficas de alta calidad. Además de ser considerado como un espacio de creación, edición, acopio y difusión de mapas digitales, como físicos, especialmente de temáticas relacionadas con las ciencias sociales y humanidades.</p>
+      <p>De este modo, en la línea de investigación aplicada: <strong>Perspectivas globales en la historia de Chiapas, Centroamérica y el Caribe, épocas moderna y contemporánea</strong>, buscamos reorganizar las actividades y funciones del laboratorio, con el fin de mantener los objetivos de este espacio y potenciar el trabajo colaborativo con estudiantes, investigadores, centros públicos CONACyT e institucionales de la UNICACH.</p>
       <h3>Objetivos</h3>
       <ul>
-        <li>Desarrollar el LACEM como un proyecto institucional del CESMECA que atienda la demanda del uso de tecnologias para el manejo y proyeccion de informacion geografica.</li>
+        <li>Desarrollar el LACEM como un proyecto institucional del CESMECA que atienda la demanda del uso de tecnologías para el manejo y proyección de información geográfica.</li>
         <li>Buscar la interdisciplinariedad del LACEM en especial con la antropologia, la historia, la sociologia y los estudios de genero.</li>
-        <li>Gestionar y proponer posibles soluciones a las problematicas sociales de Chiapas y Centroamerica a partir del uso de las herramientas SIG.</li>
-        <li>Ofrecer herramientas para mejorar los analisis sociales, economicos, culturales y de genero desde una perspectiva historica y contemporanea.</li>
-        <li>Configurar un espacio de formacion y practica para estudiantes, investigadores y el publico en general.</li>
-        <li>Contribuir a la difusion de las investigaciones de la linea de investigacion y de los analisis creados por el CESMECA.</li>
+        <li>Gestionar y proponer posibles soluciones a las problemáticas sociales de Chiapas y Centroamérica a partir del uso de las herramientas SIG.</li>
+        <li>Ofrecer herramientas para mejorar los análisis sociales, económicos, culturales y de género desde una perspectiva histórica y contemporánea.</li>
+        <li>Configurar un espacio de formación y práctica para estudiantes, investigadores y el público en general.</li>
+        <li>Contribuir a la difusión de las investigaciones de la línea de investigación y de los análisis creados por el CESMECA.</li>
       </ul>
       <h3>Coordinadores</h3>
       <p>Dr. Mario Eduardo Valdez Gordillo</p>
