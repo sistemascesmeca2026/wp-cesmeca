@@ -655,7 +655,7 @@ main.category-concejo-academico .single-featured-img {
 .posg-header-img img{max-width:100%;border-radius:6px}
 .posg-tabs-wrapper{display:flex;align-items:stretch;border:1px solid #e0e0e0!important;border-radius:8px!important;padding:0!important;box-shadow:0 2px 10px rgba(0,0,0,.06)!important;overflow:hidden}
 .posg-tabs-nav{display:flex;flex-direction:column;width:260px;min-width:260px;background:#fff;border-right:1px solid #e0e0e0;gap:0}
-.posg-tab-btn{display:block;width:100%;text-align:left;padding:12px 16px;background:#fff;border:none;border-bottom:1px solid #eee;cursor:pointer;font-size:.85rem;color:#1a1a2e;border-radius:0;transition:background .2s}
+.posg-tab-btn{display:block;width:100%;text-align:left;padding:12px 16px;background:#fff;border:none;border-bottom:1px solid #eee;cursor:pointer;font-size:.85rem;color:#1a1a2e;font-weight:700;border-radius:0;transition:background .2s}
 .posg-tab-btn:focus,.posg-tab-btn:hover{background:#f0f4ff!important;color:#1a1a2e!important;text-decoration:none}
 .posg-tab-btn.active{background:#3d8fb5!important;color:#fff!important;font-weight:700;border-bottom:1px solid #eee;margin-bottom:0}
 .posg-tab-btn.active:hover,.posg-tab-btn.active:focus{background:#3d8fb5!important;color:#fff!important}
