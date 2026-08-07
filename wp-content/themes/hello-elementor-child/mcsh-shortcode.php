@@ -80,7 +80,7 @@ function mcsh_page_shortcode() {
 <p><a title="CÓDIGO DE ÉTICA" href="/wp-content/images/documentos/Politica-de-honestidad-e-integridad-academicas.pdf" target="_blank">CÓDIGO DE ÉTICA</a></p>
 </div>
 <div class="posg-tab-panel" data-panel="mcsh_15">
-<p><strong>Inscripción semestral: \$1,500.00 (mil quinientos 00/100 mn.)</strong></p>
+<p><strong>Inscripción semestral: $1,500.00 (mil quinientos 00/100 mn.)</strong></p>
 </div>
 <div class="posg-tab-panel" data-panel="mcsh_16">
 <p>Mtra. Gabriela Cartagena López</p> <p>Correo electrónico:&nbsp;<a style="font-family: inherit; font-size: 1rem;" href="mailto:posgrado.sociales@unicach.mx">posgrado.sociales@unicach.mx</a></p> <p>Tel: 967 678 6921 ext. 136</p>
