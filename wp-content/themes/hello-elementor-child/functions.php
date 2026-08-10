@@ -876,3 +876,10 @@ add_action('template_redirect', function() {
         exit;
     }
 });
+
+// Reemplazar comillas francesas « » por comillas normales " "
+function cesmeca_fix_quotes($text) {
+    return str_replace(['«', '»'], '"', $text);
+}
+add_filter('the_title', 'cesmeca_fix_quotes', 20);
+add_filter('the_content', 'cesmeca_fix_quotes', 20);
