@@ -3,3 +3,13 @@ database/data/
 wp-content/uploads/
 backups/
 database/cesmeca_export.sql
+
+# Backups locales
+*.bak
+*.bak-*
+
+# Cache de WordPress/plugins
+wp-content/cache/
+
+# Otros
+docker-compose.yml.bak-*
