@@ -65,65 +65,126 @@ add_action('wp_footer', function() {
 });
 
 add_shortcode('directorio_tabs', function() {
-    $page = get_page_by_path('quienes-somos/directorio-datos');
-    if (!$page) return '<p>No se encontro la pagina Directorio.</p>';
+    $departamentos = get_terms(array(
+        'taxonomy'   => 'departamento',
+        'hide_empty' => true,
+        'orderby'    => 'term_id',
+    ));
 
-    $content = wpautop($page->post_content);
-
-    preg_match_all('/<h2[^>]*>(.*?)<\/h2>/i', $content, $matches);
-    $titles = $matches[1];
-    $sections = preg_split('/<h2[^>]*>.*?<\/h2>/i', $content);
-    array_shift($sections);
-
-    if (empty($titles)) return $content;
+    if (empty($departamentos) || is_wp_error($departamentos)) {
+        return '<p>No hay información del directorio disponible.</p>';
+    }
 
     ob_start();
-    echo '<style>
-    .dir-wrap{display:flex;gap:0;max-width:1200px;margin:0 auto;padding:0;align-items:stretch}
-    .dir-menu{min-width:240px;width:240px;border:1px solid #e0e0e0;border-radius:8px 0 0 8px;overflow:hidden;background:#fff}
-    .dir-menu-item{display:block;padding:13px 18px;cursor:pointer;font-size:.88rem;color:#1a1a2e;border-bottom:1px solid #eee;transition:all .2s;text-decoration:none;line-height:1.3}
-    .dir-menu-item:last-child{border-bottom:none}
-    .dir-menu-item:hover{background:#f0f4ff;color:#2563eb}
-    .dir-menu-item.active{background:#3d8fb5;color:#fff;font-weight:700}
-    .dir-content{flex:1;border:1px solid #e0e0e0;border-left:none;border-radius:0 8px 8px 0;background:#f9f9f9;min-height:400px}
-    .dir-section{display:none;padding:28px 32px}
-    .dir-section.active{display:block}
-    .dir-section{column-count:2;column-gap:32px}
-    .dir-section p{break-inside:avoid;margin:0 0 14px}
-    @media(max-width:900px){.dir-section{column-count:1}}
-    .dir-section-title{font-size:1.15rem;font-weight:700;color:#1a3a4a;margin:0 0 20px;padding-bottom:12px;border-bottom:2px solid #e0e0e0;column-span:all}
-    .dir-section p{margin:0 0 14px;font-size:.9rem;line-height:1.7;color:#333}
-    .dir-section a{color:#2563eb;text-decoration:none}
-    .dir-section a:hover{text-decoration:underline}
-    @media(max-width:768px){
-        .dir-wrap{flex-direction:column;padding:16px}
-        .dir-menu{width:100%;border-radius:8px 8px 0 0}
-        .dir-content{border-left:1px solid #e0e0e0;border-top:none;border-radius:0 0 8px 8px;min-height:auto}
-    }
-    .dir-menu-item, .dir-menu-item:hover, .dir-menu-item:visited{text-decoration:none !important}</style>';
-    echo '<div style="margin:16px 0;padding:12px 20px;background:#f0f7fb;border-left:4px solid #3d8fb5;border-radius:6px;display:flex;align-items:center;flex-wrap:wrap;gap:6px;font-size:.88rem;color:#1a3a4a"><strong>📞 Conmutador General:</strong> <a href="tel:+529676786921" style="color:#3d8fb5;font-weight:600">(+52) 967-6786921</a> &middot; <a href="tel:9671120483" style="color:#3d8fb5">967-1120483</a> &middot; <a href="tel:9671120484" style="color:#3d8fb5">967-1120484</a> &middot; <a href="tel:9671120485" style="color:#3d8fb5">967-1120485</a> — marca la extensión deseada</div>';
+    ?>
+    <style>
+        .dir-wrap { display:flex; align-items:stretch; gap:0; max-width:1200px; margin:0 auto; padding:0; flex-wrap:wrap; }
+        .dir-menu { min-width:240px; width:240px; border:1px solid #e0e0e0; border-radius:8px 0 0 8px; overflow:hidden; background:#fff; }
+        .dir-nav-search { padding:12px; border-bottom:1px solid #e0e0e0; }
+        .dir-nav-search input { width:100%; padding:8px 10px; border:1px solid #ccc; border-radius:6px; font-size:14px; box-sizing:border-box; }
+        .dir-menu-item { display:block; width:100%; text-align:left; padding:13px 18px; background:none; border:none; border-bottom:1px solid #eee; cursor:pointer; font-size:.88rem; color:#1a1a2e; text-decoration:none !important; line-height:1.3; }
+        .dir-menu-item:last-child { border-bottom:none; }
+        .dir-menu-item:hover { background:#f0f4ff; color:#2563eb; }
+        .dir-menu-item.active { background:#3d8fb5; color:#fff; font-weight:700; }
+        .dir-content { flex:1; border:1px solid #e0e0e0; border-left:none; border-radius:0 8px 8px 0; background:#f9f9f9; min-height:400px; }
+        .dir-section { display:none; padding:28px 32px; column-count:2; column-gap:32px; }
+        .dir-section.active { display:block; }
+        .dir-section-title { font-size:1.15rem; font-weight:700; color:#1a3a4a; margin:0 0 20px; padding-bottom:12px; border-bottom:2px solid #e0e0e0; column-span:all; }
+        .dir-persona { break-inside:avoid; margin:0 0 14px; font-size:.9rem; line-height:1.7; color:#333; }
+        .dir-persona .dir-nombre { font-weight:600; }
+        .dir-persona a { color:#2563eb; text-decoration:none; }
+        .dir-persona a:hover { text-decoration:underline; }
+        .dir-badge { display:inline-block; margin-top:4px; padding:2px 10px; background:#eaf3f8; color:#1a6ebd; border-radius:12px; font-size:12px; font-weight:600; }
+        .dir-persona-oculta { display:none !important; }
+        @media(max-width:900px){ .dir-section{ column-count:1; } }
+        @media(max-width:768px){
+            .dir-wrap{ flex-direction:column; padding:16px; }
+            .dir-menu{ width:100%; border-radius:8px 8px 0 0; display:flex; flex-wrap:wrap; }
+            .dir-nav-search{ flex-basis:100%; }
+            .dir-content{ border-left:1px solid #e0e0e0; border-top:none; border-radius:0 0 8px 8px; min-height:auto; }
+        }
+    </style>
+    <div style="margin:16px 0;padding:12px 20px;background:#f0f7fb;border-left:4px solid #3d8fb5;border-radius:6px;display:flex;align-items:center;flex-wrap:wrap;gap:6px;font-size:.88rem;color:#1a3a4a"><strong>📞 Conmutador General:</strong> <a href="tel:+529676786921" style="color:#3d8fb5;font-weight:600">(+52) 967-6786921</a> &middot; <a href="tel:9671120483" style="color:#3d8fb5">967-1120483</a> &middot; <a href="tel:9671120484" style="color:#3d8fb5">967-1120484</a> &middot; <a href="tel:9671120485" style="color:#3d8fb5">967-1120485</a> — marca la extensión deseada</div>
 
-    echo '<div class="dir-wrap"><div class="dir-menu">';
-    foreach($titles as $i => $title) {
-        $active = $i === 0 ? ' active' : '';
-        echo '<a class="dir-menu-item' . $active . '" href="#" onclick="dirTab(' . $i . '); return false;">' . strip_tags($title) . '</a>';
-    }
-    echo '</div><div class="dir-content">';
-    foreach($sections as $i => $section) {
-        $active = $i === 0 ? ' active' : '';
-        echo '<div class="dir-section' . $active . '" id="dir-sec-' . $i . '">';
-        echo '<div class="dir-section-title">' . strip_tags($titles[$i]) . '</div>';
-        echo trim($section);
-        echo '</div>';
-    }
-    echo '</div></div>';
-    echo '<script>
+    <div class="dir-wrap">
+        <div class="dir-menu">
+            <div class="dir-nav-search">
+                <input type="text" id="dir-buscador" placeholder="Buscar por nombre...">
+            </div>
+            <?php foreach ($departamentos as $i => $dep): ?>
+                <a href="#" class="dir-menu-item<?php echo $i === 0 ? ' active' : ''; ?>" onclick="dirTab(<?php echo $i; ?>); return false;"><?php echo esc_html($dep->name); ?></a>
+            <?php endforeach; ?>
+        </div>
+
+        <div class="dir-content">
+            <?php foreach ($departamentos as $i => $dep):
+                $personas = get_posts(array(
+                    'post_type'      => 'directorio_persona',
+                    'posts_per_page' => -1,
+                    'orderby'        => 'menu_order',
+                    'order'          => 'ASC',
+                    'tax_query'      => array(array(
+                        'taxonomy' => 'departamento',
+                        'field'    => 'term_id',
+                        'terms'    => $dep->term_id,
+                    )),
+                ));
+                ?>
+                <div class="dir-section<?php echo $i === 0 ? ' active' : ''; ?>" id="dir-sec-<?php echo $i; ?>">
+                    <div class="dir-section-title"><?php echo esc_html($dep->name); ?></div>
+                    <?php foreach ($personas as $persona):
+                        $cargo = get_post_meta($persona->ID, '_directorio_cargo', true);
+                        $email = get_post_meta($persona->ID, '_directorio_email', true);
+                        $tel   = get_post_meta($persona->ID, '_directorio_tel', true);
+                        $nota  = get_post_meta($persona->ID, '_directorio_nota', true);
+                        ?>
+                        <div class="dir-persona" data-nombre="<?php echo esc_attr(mb_strtolower($persona->post_title)); ?>">
+                            <div class="dir-nombre"><?php echo esc_html($persona->post_title); ?></div>
+                            <?php if ($cargo): ?><div><?php echo esc_html($cargo); ?></div><?php endif; ?>
+                            <?php if ($email): ?><div>✉ <a href="mailto:<?php echo esc_attr($email); ?>"><?php echo esc_html($email); ?></a></div><?php endif; ?>
+                            <?php if ($tel): ?><div><?php echo esc_html($tel); ?></div><?php endif; ?>
+                            <?php if ($nota): ?><div><span class="dir-badge"><?php echo esc_html($nota); ?></span></div><?php endif; ?>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            <?php endforeach; ?>
+        </div>
+    </div>
+    <script>
     function dirTab(n) {
         document.querySelectorAll(".dir-menu-item").forEach(function(el,i){ el.classList.toggle("active", i===n); });
         document.querySelectorAll(".dir-section").forEach(function(el,i){ el.classList.toggle("active", i===n); });
     }
-    </script>';
+    (function() {
+        var buscador = document.getElementById('dir-buscador');
+        if (!buscador) return;
+        buscador.addEventListener('input', function() {
+            var q = buscador.value.trim().toLowerCase();
+            var personas = document.querySelectorAll('.dir-persona');
+            var secciones = document.querySelectorAll('.dir-section');
+            var menuItems = document.querySelectorAll('.dir-menu-item');
 
+            if (q === '') {
+                personas.forEach(function(p) { p.classList.remove('dir-persona-oculta'); });
+                secciones.forEach(function(s, i) { s.classList.toggle('active', i === 0); });
+                menuItems.forEach(function(el, i) { el.classList.toggle('active', i === 0); });
+                return;
+            }
+
+            personas.forEach(function(p) {
+                var coincide = p.dataset.nombre.indexOf(q) !== -1;
+                p.classList.toggle('dir-persona-oculta', !coincide);
+            });
+
+            secciones.forEach(function(s, i) {
+                var tieneCoincidencia = s.querySelectorAll('.dir-persona:not(.dir-persona-oculta)').length > 0;
+                s.classList.toggle('active', tieneCoincidencia);
+                menuItems[i].classList.toggle('active', tieneCoincidencia);
+            });
+        });
+    })();
+    </script>
+    <?php
     return ob_get_clean();
 });
 
@@ -869,13 +930,6 @@ function cesmeca_render_gallery_tabs($args) {
     return ob_get_clean();
 }
 
-// Redirigir la página de datos del directorio a la página pública con pestañas
-add_action('template_redirect', function() {
-    if (is_page(1554)) {
-        wp_redirect(home_url('/quienes-somos/directorio/'), 301);
-        exit;
-    }
-});
 
 // Reemplazar comillas francesas « » por comillas normales " "
 function cesmeca_fix_quotes($text) {
@@ -883,3 +937,218 @@ function cesmeca_fix_quotes($text) {
 }
 add_filter('the_title', 'cesmeca_fix_quotes', 20);
 add_filter('the_content', 'cesmeca_fix_quotes', 20);
+// --- Custom Post Type: directorio_persona ---
+function cesmeca_registrar_cpt_directorio() {
+    register_post_type('directorio_persona', array(
+        'labels' => array(
+            'name'          => 'Directorio',
+            'singular_name' => 'Persona',
+            'add_new_item'  => 'Agregar persona',
+            'edit_item'     => 'Editar persona',
+            'all_items'     => 'Directorio',
+        ),
+        'public'       => false,
+        'show_ui'      => true,
+        'show_in_menu' => true,
+        'menu_icon'    => 'dashicons-groups',
+        'supports'     => array('title', 'page-attributes'),
+        'hierarchical' => false,
+    ));
+}
+add_action('init', 'cesmeca_registrar_cpt_directorio');
+
+function cesmeca_registrar_taxonomia_departamento() {
+    register_taxonomy('departamento', 'directorio_persona', array(
+        'labels' => array(
+            'name'          => 'Departamentos',
+            'singular_name' => 'Departamento',
+        ),
+        'hierarchical' => true,
+        'show_ui'      => true,
+        'show_admin_column' => true,
+    ));
+}
+add_action('init', 'cesmeca_registrar_taxonomia_departamento');
+
+function cesmeca_precargar_departamentos() {
+    if (get_option('cesmeca_departamentos_precargados')) return;
+    $departamentos = array(
+        'Dirección','Secretaría Académica','Secretaría de Extensión y Vinculación',
+        'Secretaría Administrativa','Coordinación de Posgrados','Área de Servicios Informáticos',
+        'CID Andrés Fábregas Puig','Investigadores','Técnicos académicos','Estancias posdoctorales',
+    );
+    foreach ($departamentos as $nombre) {
+        if (!term_exists($nombre, 'departamento')) {
+            wp_insert_term($nombre, 'departamento');
+        }
+    }
+    update_option('cesmeca_departamentos_precargados', 1);
+}
+add_action('init', 'cesmeca_precargar_departamentos', 20);
+
+function cesmeca_directorio_metabox() {
+    add_meta_box('cesmeca_directorio_datos', 'Datos de contacto', 'cesmeca_directorio_metabox_html', 'directorio_persona', 'normal', 'high');
+}
+add_action('add_meta_boxes', 'cesmeca_directorio_metabox');
+
+function cesmeca_directorio_metabox_html($post) {
+    wp_nonce_field('cesmeca_directorio_guardar', 'cesmeca_directorio_nonce');
+    $cargo = get_post_meta($post->ID, '_directorio_cargo', true);
+    $email = get_post_meta($post->ID, '_directorio_email', true);
+    $tel   = get_post_meta($post->ID, '_directorio_tel', true);
+    $nota  = get_post_meta($post->ID, '_directorio_nota', true);
+    ?>
+    <p><label for="cesmeca_cargo"><strong>Cargo</strong></label><br>
+    <input type="text" id="cesmeca_cargo" name="cesmeca_cargo" value="<?php echo esc_attr($cargo); ?>" style="width:100%;" placeholder="Ej. Director, Coordinadora del Posgrado en..."></p>
+    <p><label for="cesmeca_email"><strong>Email</strong></label><br>
+    <input type="email" id="cesmeca_email" name="cesmeca_email" value="<?php echo esc_attr($email); ?>" style="width:100%;" placeholder="nombre.apellido@unicach.mx"></p>
+    <p><label for="cesmeca_tel"><strong>Teléfono / Extensión</strong></label><br>
+    <input type="text" id="cesmeca_tel" name="cesmeca_tel" value="<?php echo esc_attr($tel); ?>" style="width:100%;" placeholder="Ej. Tel. 103"></p>
+    <p><label for="cesmeca_nota"><strong>Nota</strong> (opcional — se muestra como etiqueta)</label><br>
+    <input type="text" id="cesmeca_nota" name="cesmeca_nota" value="<?php echo esc_attr($nota); ?>" style="width:100%;" placeholder="Ej. Licencia, Estancia Posdoctoral por México"></p>
+    <?php
+}
+
+function cesmeca_directorio_guardar($post_id) {
+    if (!isset($_POST['cesmeca_directorio_nonce']) || !wp_verify_nonce($_POST['cesmeca_directorio_nonce'], 'cesmeca_directorio_guardar')) return;
+    if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) return;
+    if (!current_user_can('edit_post', $post_id)) return;
+    $campos = array('cesmeca_cargo' => '_directorio_cargo', 'cesmeca_email' => '_directorio_email', 'cesmeca_tel' => '_directorio_tel', 'cesmeca_nota' => '_directorio_nota');
+    foreach ($campos as $campo_post => $meta_key) {
+        if (isset($_POST[$campo_post])) {
+            update_post_meta($post_id, $meta_key, sanitize_text_field($_POST[$campo_post]));
+        }
+    }
+}
+add_action('save_post_directorio_persona', 'cesmeca_directorio_guardar');
+
+function cesmeca_migrar_directorio() {
+    if (get_option('cesmeca_directorio_migrado')) return;
+    $datos = array(
+        'Dirección' => array(
+            array('Dr. Emmanuel Nájera de León', 'Director', 'director_cesmeca@unicach.mx', 'Tel. 103', ''),
+            array('Lic. Ana María de la Cruz González', 'Asistente de la Dirección', 'direccion_cesmeca@unicach.mx', 'Tel. 103', ''),
+        ),
+        'Secretaría Académica' => array(
+            array('Dra. Yesenia López Cruz', 'Secretaria Académica', 'investigacion_cesmeca@unicach.mx', 'Tel. 142', ''),
+        ),
+        'Secretaría de Extensión y Vinculación' => array(
+            array('Lic. Roberto Rico Chong', 'Secretario de Extensión y Vinculación', 'roberto.rico@unicach.mx', 'Tel. 139', ''),
+            array('Mtra. Adriana G. Ramos Zepeda', 'Coordinación de Comunicación y Difusión', 'adriana.ramos@unicach.mx', 'Tel. 106', ''),
+            array('Lic. Irma Cecilia Medina Villafuerte', 'Editora adjunta', 'irma.medina@unicach.mx', 'Tel. 106', ''),
+            array('Tec. Brenda Medina Villafuerte', 'Asistente editorial', 'brenda.medina@unicach.mx', 'Tel. 106', ''),
+            array('Ing. Roberto Carlos Hoover Silvano', 'Técnico informático', 'roberto.hoover@unicach.mx', 'Tel. 106', ''),
+            array('Lic. Gabriela Fragoso Samaniego', 'Convenios', 'gabriela.fragoso@unicach.mx', '', ''),
+        ),
+        'Secretaría Administrativa' => array(
+            array('Lic. Jenny Araceli Molina Gómez', 'Secretaria Administrativa', 'administracion_cesmeca@unicach.mx', 'Tel. 140', ''),
+            array('Lic. Patricia Ballinas Salazar', 'Auxiliar administrativa', 'patricia.ballinas@unicach.mx', 'Tel. 104', ''),
+            array('Lic. Patricia Ruiz Pérez', 'Auxiliar administrativa', 'patricia.ruiz@unicach.mx', 'Tel. 104', ''),
+            array('C. Dora Juvenalia Gordillo', 'Recepcionista', 'dora.gordillo@unicach.mx', 'Tel. 102', ''),
+        ),
+        'Coordinación de Posgrados' => array(
+            array('Mtra. Gabriela Cartagena López', 'Coordinadora del Posgrado en Ciencias Sociales y Humanísticas', 'posgrado.sociales@unicach.mx', 'Tel. 136', ''),
+            array('Mtra. Norma Guadalupe Pérez López', 'Coordinadora del Posgrado en Estudios e Intervención Feministas', 'posgrado.feminismos@unicach.mx', 'Tel. 141', ''),
+            array('Lic. Yenny Reyes Roque', 'Servicios Escolares', 'yenny.reyes@unicach.mx', 'Tel. 105', ''),
+            array('Lic. Alma Yaneth Mera Calva', 'Asistente académica', 'alma.mera@unicach.mx', 'Tel. 105', ''),
+        ),
+        'Área de Servicios Informáticos' => array(
+            array('Ing. Salvador Jorge Huerta Díaz', 'Responsable de sistemas', 'salvador.huerta@unicach.mx', 'Tel. 108', ''),
+        ),
+        'CID Andrés Fábregas Puig' => array(
+            array('Lic. Idolina Guzmán Coronado', 'Jefa del área', 'cid.cesmeca@unicach.mx', 'Tel. 107', ''),
+            array('Ing. Luis Gerardo Morales Ramos', 'Asistente de Biblioteca', 'cid.cesmeca@unicach.mx', 'Tel. 107', ''),
+        ),
+        'Investigadores' => array(
+            array('Dr. Daniel Villafuerte Solís', '', 'gasoda2000@gmail.com', 'Tel. 109', ''),
+            array('Dr. Jesús Solís Cruz', '', 'jesus.solis@unicach.mx', 'Tel. 110', ''),
+            array('Dra. Astrid Pinto Durán', '', 'astrid.pinto@unicach.mx', 'Tel. 113', ''),
+            array('Dr. Jesús Morales Bermúdez', '', 'jesus.morales@unicach.mx', 'Tel. 118', ''),
+            array('Dr. Martín de la Cruz López Moya', '', 'martin.lopez@unicach.mx', 'Tel. 120', ''),
+            array('Dra. Alejandra Robles Ruiz', '', 'ana.robles@unicach.mx', 'Tel. 123', ''),
+            array('Dra. Flor Marina Bermúdez Urbina', '', 'flor.bermudez@unicach.mx', 'Tel. 125', ''),
+            array('Dr. Mario Valdez Gordillo', '', 'mvaldezg@unicach.mx', 'Tel. 126', ''),
+            array('Dra. Ma. Luisa de la Garza Chávez', '', 'marialuisa.garza@unicach.mx', 'Tel. 129', ''),
+            array('Dra. María del Carmen García Aguilar', '', 'carmen.garcia@unicach.mx', 'Tel. 131', ''),
+            array('Dr. Alain Basail Rodríguez', '', 'alain.basail@unicach.mx', 'Tel. 132', ''),
+            array('Dra. Magda Estrella Zúñiga Zenteno', '', 'magdazuniga@hotmail.com', 'Tel. 134', ''),
+            array('Dr. Axel Köhler', '', 'axel.kohler@unicach.mx', 'Tel. 135', ''),
+            array('Dra. Teresa Garzón Martínez', '', 'maria.garzon@unicach.mx', 'Tel. 138', ''),
+            array('Dra. María de Lourdes Morales Vargas', '', 'maria.morales@unicach.mx', '', ''),
+            array('Dr. Carlos de Jesús Gómez Abarca', '', 'carlos.gomez@unicach.mx', 'Tel. 114', ''),
+            array('Dra. Delmy Tania Cruz Hernández', '', 'delmy.cruz@unicach.mx', '', ''),
+            array('Dra. Mónica Aguilar Mendizábal', '', 'monica.aguilar@unicach.mx', '', ''),
+            array('Dra. Karla Lizbeth Somosa Ibarra', '', 'karla.somosa@unicach.mx', '', ''),
+            array('Dra. Marisol Anzo Escobar', '', 'marisol.anzo@unicach.mx', '', ''),
+            array('Dr. Armando Méndez Zárate', '', 'armando.mendez@unicach.mx', '', ''),
+        ),
+        'Técnicos académicos' => array(
+            array('Dr. Fabio Alexis de Ganges López', '', 'fabio.ganges@unicach.mx', '', ''),
+            array('Mtro. Gabriel Hernández García', '', 'gabriel.hernandez@unicach.mx', 'Tel. 119', ''),
+            array('Dr. Pablo Alejandro Uc González', 'Coordinador del Observatorio de las Democracias del sur de México y Centroamérica', 'pablo.uc@unicach.mx', '', ''),
+            array('Lic. Egner Vázquez López', '', 'egner.vazquez@unicach.mx', '', ''),
+            array('Mtro. Emilio Pérez Pérez', '', 'emilio.perez@unicach.mx', '', 'Licencia'),
+            array('Dr. Mauricio Arellano Nucamendi', '', 'mauricio.arellano@unicach.mx', '', 'Estancia posdoctoral en CIESAS-Pacífico'),
+            array('Lic. Juan Jesús Pérez Gómez', '', 'juan.perez@unicach.mx', '', ''),
+        ),
+        'Estancias posdoctorales' => array(
+            array('Dra. Nelly Eblin Barrientos Gutiérrez', '', '', '', 'Investigadores por México-CONAHCyT'),
+            array('Dr. Soiber Adalberto Velázquez Matíaz', '', '', '', 'Estancia Posdoctoral por México'),
+            array('Dr. Francisco Ramón Castro Hernández', '', '', '', 'Estancia Posdoctoral por México'),
+            array('Dr. Manuel Ignacio Martínez Espinoza', '', '', '', 'Estancia Posdoctoral por México'),
+            array('Dra. Agnes del Rosario Jiménez Romo', '', '', '', 'Estancia Posdoctoral por México'),
+            array('Dra. Ana Luisa Sánchez Hernández', '', '', '', 'Estancia Posdoctoral por México'),
+            array('Dr. Arturo Montoya Hernández', '', '', '', 'Estancia Posdoctoral'),
+        ),
+    );
+
+    foreach ($datos as $departamento => $personas) {
+        $orden = 1;
+        foreach ($personas as $p) {
+            list($nombre, $cargo, $email, $tel, $nota) = $p;
+            $post_id = wp_insert_post(array(
+                'post_title'  => $nombre,
+                'post_type'   => 'directorio_persona',
+                'post_status' => 'publish',
+                'menu_order'  => $orden,
+            ));
+            if (!is_wp_error($post_id) && $post_id) {
+                wp_set_object_terms($post_id, $departamento, 'departamento');
+                if ($cargo) update_post_meta($post_id, '_directorio_cargo', $cargo);
+                if ($email) update_post_meta($post_id, '_directorio_email', $email);
+                if ($tel)   update_post_meta($post_id, '_directorio_tel', $tel);
+                if ($nota)  update_post_meta($post_id, '_directorio_nota', $nota);
+            }
+            $orden++;
+        }
+    }
+    update_option('cesmeca_directorio_migrado', 1);
+}
+add_action('init', 'cesmeca_migrar_directorio', 30);
+
+// --- Publicaciones: mostrar todas en una sola página (para que el buscador JS las encuentre todas) ---
+add_action('pre_get_posts', function($query) {
+    if (!is_admin() && $query->is_main_query() && is_category('publicaciones')) {
+        $query->set('posts_per_page', 200);
+    }
+});
+
+// --- Redirigir páginas "padre" vacías (con submenú) a su primera página hija ---
+add_action('template_redirect', function() {
+    if (!is_page()) return;
+
+    $post_id = get_queried_object_id();
+
+    $hijas = get_pages([
+        'child_of'    => $post_id,
+        'parent'      => $post_id,
+        'sort_column' => 'menu_order,post_title',
+        'sort_order'  => 'ASC',
+        'number'      => 1,
+    ]);
+
+    if (!empty($hijas)) {
+        wp_redirect(get_permalink($hijas[0]->ID), 302);
+        exit;
+    }
+});
