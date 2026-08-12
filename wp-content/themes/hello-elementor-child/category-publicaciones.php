@@ -15,7 +15,7 @@ if ( have_posts() ) {
     <div style="max-width:1200px; margin:0 auto; padding:30px 20px;">
         <div class="publicaciones-header"><h1>Publicaciones</h1></div>
         <div class="pub-filtros-wrap">
-            <input type="text" id="pub-buscador" placeholder="Buscar por título...">
+            <input type="text" id="pub-buscador" placeholder="Buscar por autor o título...">
             <select id="pub-filtro-anio">
                 <option value="">Todos los años</option>
                 <?php foreach ( array_keys( $anios_disponibles ) as $anio ) : ?>
@@ -26,7 +26,7 @@ if ( have_posts() ) {
         <?php if ( have_posts() ) : $pub_i = 0; ?>
         <div class="publicaciones-grid" id="pub-grid">
             <?php while ( have_posts() ) : the_post(); $pub_i++; ?>
-            <div class="pub-card<?php echo $pub_i > 12 ? ' pub-card-lote-oculto' : ''; ?>" data-titulo="<?php echo esc_attr( mb_strtolower( get_the_title() ) ); ?>" data-anio="<?php echo esc_attr( get_the_date( 'Y' ) ); ?>">
+            <div class="pub-card<?php echo $pub_i > 12 ? ' pub-card-lote-oculto' : ''; ?>" data-titulo="<?php echo esc_attr( mb_strtolower( get_the_title() ) ); ?>" data-anio="<?php echo esc_attr( get_the_date( 'Y' ) ); ?>" data-extracto="<?php echo esc_attr( mb_strtolower( wp_strip_all_tags( get_the_excerpt() ) ) ); ?>">
                 <div class="pub-card-image">
                     <?php if ( has_post_thumbnail() ) : ?>
                         <a href="<?php the_permalink(); ?>"><?php the_post_thumbnail( "large" ); ?></a>
@@ -82,6 +82,14 @@ if ( have_posts() ) {
         return (buscador.value.trim() !== '') || (filtroAnio.value !== '');
     }
 
+    function coincideBusqueda(t, q) {
+        if (q === '') return true;
+        // Primero autor (va dentro del extracto), después título
+        if (t.dataset.extracto && t.dataset.extracto.indexOf(q) !== -1) return true;
+        if (t.dataset.titulo.indexOf(q) !== -1) return true;
+        return false;
+    }
+
     function aplicarFiltros() {
         var q = buscador.value.trim().toLowerCase();
         var anio = filtroAnio.value;
@@ -90,7 +98,7 @@ if ( have_posts() ) {
 
         tarjetas.forEach(function(t) {
             if (activos) {
-                var coincideTexto = q === '' || t.dataset.titulo.indexOf(q) !== -1;
+                var coincideTexto = coincideBusqueda(t, q);
                 var coincideAnio = anio === '' || t.dataset.anio === anio;
                 var coincide = coincideTexto && coincideAnio;
                 t.classList.remove('pub-card-lote-oculto');
