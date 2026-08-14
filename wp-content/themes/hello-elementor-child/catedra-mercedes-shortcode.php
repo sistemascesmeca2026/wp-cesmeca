@@ -21,22 +21,7 @@ function catedra_mercedes_shortcode() {
     ];
     $agenda = array_map(function($src) { return ['src' => $src, 'alt' => '']; }, $agenda_raw);
 
-    $videos_raw = [
-        ['l6EUPzwXh3U','Practicas para cuidar la vida'],
-        ['1T7LV33AYv8','Abriendo brechas, enfrentando muros y avizorando futuros: sentipensar y comunicar los feminismos'],
-        ['h1Vjo283wV0','Flora Tristan, en los inicios del feminismo socialista'],
-        ['PVi6TOwcWys','Bienestar social y genero avances'],
-        ['7dRa62IAXTo','Presentacion del libro Vivir para el Surco'],
-        ['ksa75OlP4II','Presentacion del libro Paxneloliberalia de Jules Falquet'],
-        ['i-dLFu1LiIw','El teatro popular como herramienta y camino'],
-        ['R05AdaCrRQg','Desafios para una economia feminista decolonial: el fundamentalismo neoliberal'],
-        ['Ls75l4o0sUc','Cuba, sus crisis y la resistencia de las mujeres'],
-        ['8A_eVZockFM','Diplomado Repensandonos desde la Economia Feminista Emancipatoria'],
-        ['rAn7LcZpGrY','Los retos de los feminismos descoloniales ante las violencias extremas en Mexico'],
-        ['bsbNqPCROcc','Luchas renovadas de las mujeres en America Latina: Tiempos de rebelion'],
-        ['XOEucjPl57g','Una mirada feminista sobre el imperio global norteamericano'],
-    ];
-    $videos = array_map(function($v) { return ['id' => $v[0], 'title' => $v[1]]; }, $videos_raw);
+    $videos = cesmeca_get_youtube_videos('merc');
 
     ob_start();
     ?>

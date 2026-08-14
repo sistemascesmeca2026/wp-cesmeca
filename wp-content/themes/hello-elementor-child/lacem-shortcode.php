@@ -12,19 +12,15 @@ function lacem_page_shortcode() {
         ['src'=>'/wp-content/uploads/cesmeca-legacy/LACEM/memoria.jpg','alt'=>'Memoria y resistencia cartel'],
         ['src'=>'/wp-content/uploads/cesmeca-legacy/LACEM/cartografia.jpg','alt'=>'Exposicion fotografica cartel'],
     ];
-    $videos_2023 = [
-        ['id'=>'jAuaEr7w1c0','title'=>'Exposicion fotografica: Cartografia, Memoria e Historia'],
-    ];
-    $videos_2021 = [
-        ['id'=>'UrCuJnzToNY','title'=>'Laboratorio de Cartografias y Elaboracion de Mapas (LACEM)'],
-        ['id'=>'X0GieF9QBDw','title'=>'Los enigmas de los codices adivinatorios: manuscritos Borgia y Vaticano B'],
-        ['id'=>'zZpdr6MhsJ8','title'=>'Conejo, ombligo y sueno: el espectaculo y la risa entre los nahuas prehispanicos'],
-        ['id'=>'fKOR_7zaOZY','title'=>'Foro Mapas para armar: de cartillas, manuales y guias de cartografia participativa'],
-        ['id'=>'_O0nWJGQvt4','title'=>'El Salvador en datos: uso y disponibilidad de fuentes geograficas y estadisticas (1)'],
-        ['id'=>'kE8vWPmQapo','title'=>'El Salvador en datos: uso y disponibilidad de fuentes geograficas y estadisticas (2)'],
-        ['id'=>'l8XxyJSpoQA','title'=>'El Salvador en datos: uso y disponibilidad de fuentes geograficas y estadisticas (3)'],
-        ['id'=>'ri12Kv5OU90','title'=>'Foro: Sistemas de información geográfica históricos: reinterpretar el pasado con mapas del presente'],
-    ];
+    $todos_videos = cesmeca_get_youtube_videos('lacem');
+    $videos_2023 = array_values(array_filter($todos_videos, function($v) {
+        $year = $v['published'] ? (int) substr($v['published'], 0, 4) : 0;
+        return $year >= 2022 && $year <= 2023;
+    }));
+    $videos_2021 = array_values(array_filter($todos_videos, function($v) {
+        $year = $v['published'] ? (int) substr($v['published'], 0, 4) : 0;
+        return $year >= 2015 && $year <= 2021;
+    }));
     $actividades_2021 = [
         ['src'=>'/wp-content/uploads/cesmeca-legacy/2019/00/Conferencia_Aztecas_en_la_nube_de_puntos_.jpg','alt'=>'Aztecas en la nube de puntos'],
         ['src'=>'/wp-content/uploads/cesmeca-legacy/2019/10/07/ciudad-de-vacaciones.png','alt'=>'Ciudad de Vacaciones'],

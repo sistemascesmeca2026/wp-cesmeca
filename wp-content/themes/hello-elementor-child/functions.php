@@ -1152,3 +1152,25 @@ add_action('template_redirect', function() {
         exit;
     }
 });
+
+function cesmeca_get_youtube_videos($prefix, $limit = 50) {
+    $file = WP_CONTENT_DIR . '/uploads/youtube-cache/' . $prefix . '.json';
+    if (!file_exists($file)) {
+        return [];
+    }
+    $data = json_decode(file_get_contents($file), true);
+    if (empty($data['items']) || !is_array($data['items'])) {
+        return [];
+    }
+    $videos = [];
+    foreach ($data['items'] as $item) {
+        $video_id = $item['snippet']['resourceId']['videoId'] ?? null;
+        $title = $item['snippet']['title'] ?? '';
+        if (!$video_id || $title === 'Private video' || $title === 'Deleted video') {
+            continue;
+        }
+        $published = $item['snippet']['publishedAt'] ?? '';
+        $videos[] = ['id' => $video_id, 'title' => $title, 'published' => $published];
+    }
+    return array_slice($videos, 0, $limit);
+}

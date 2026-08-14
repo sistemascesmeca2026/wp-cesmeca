@@ -35,23 +35,7 @@ add_shortcode('laud_page', function() {
         return ['src' => $base . '/' . $img, 'alt' => ''];
     }, $imgs_raw);
 
-    $videos_raw = [
-        ['6N3NtRcmzL0','MUESTRA DE CINE FEMINISTA. PARENTAL ADVISORY: feminismo explícito'],
-        ['gVVmhtLroNg','Conversatorio: Resiliencia y Resistencia en las mujeres negras'],
-        ['Y3byZrAN2Zg','Efraín Ascencio Cedillo, a un año de su partida'],
-        ['oeljpIA4oBU','Octavas Jornadas de Afromexicanidad y Afrodescendencia'],
-        ['o_56Hf9V6Zk','Octavas Jornadas de Afromexicanidad y Afrodescendencia'],
-        ['op5vK0YURm0','Séptimas Jornadas de Afromexicanidad y Afrodescendencia México'],
-        ['ysxs19nhVcQ','Séptimas Jornadas de Afromexicanidad y Afrodescendencia México'],
-        ['ZCeDd0wgFbA','Séptimas Jornadas de Afromexicanidad y Afrodescendencia México'],
-        ['psO-ELJdEZM','NO-MENTE, DIBUJO DE ROSTRO. Una fuga del canon pictórico.'],
-        ['yqzZ9Phls3M','El arte, factor social de cambio'],
-        ['hvNOCrpzmOw','Experiencias Creativas y Artísticas entre Juventudes del Sureste Mexicano'],
-        ['7zPsHUtPNwI','Juventudes Música y Diversidad Cultural'],
-    ];
-    $videos = array_map(function($v) {
-        return ['id' => $v[0], 'title' => $v[1]];
-    }, $videos_raw);
+    $videos = cesmeca_get_youtube_videos('laud');
 
     return cesmeca_render_gallery_tabs([
         'prefix' => 'laud',

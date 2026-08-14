@@ -15,9 +15,7 @@ function seminario_historia_shortcode() {
     ];
     $agenda = array_map(function($p) { return ['src' => $p[0], 'alt' => $p[1]]; }, $agenda_raw);
 
-    $videos = [
-        ['id' => '9tbQ_-U76NY', 'title' => 'Seminario Permanente de Historia de Chiapas y Centroamérica'],
-    ];
+    $videos = cesmeca_get_youtube_videos('semhist');
 
     ob_start();
     ?>

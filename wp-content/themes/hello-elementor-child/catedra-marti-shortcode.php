@@ -20,23 +20,7 @@ function catedra_marti_shortcode() {
     ];
     $agenda = array_map(function($src) { return ['src' => $src, 'alt' => '']; }, $agenda_raw);
 
-    $videos_raw = [
-        ['lL4eo4I6bx0','Horizontes comunitario-populares en tension. Estado Plurinacional en Bolivia'],
-        ['93rtxwLz9f4','El espacio centroamericano, del siglo XVI al XXI. Transformaciones y utopias'],
-        ['Ghtpy8fO3As','Pueblos originarios y patrimonio biocultural: claves para entender el contexto ambiental actual'],
-        ['iegAIbA-3H0','(In)Gobernabilidad democratica y crisis social en Honduras y Centroamerica'],
-        ['txTbuh_kj3c','El paradigma multidisciplinar de la salud comunitaria en America Latina'],
-        ['RdtuzpmAuAo','La comunidad indigena insurgente. Peru, Bolivia y Mexico (1980-2000)'],
-        ['62dDU2IjejA','Conversatorio con Jaime Preciado Coronado'],
-        ['yPYCz93IykA','El legado politico e intelectual de Frantz Fanon'],
-        ['x2KkSYReHL4','El Acontecimiento del 1 de julio: Mexico hacia una Cuarta Transformacion?'],
-        ['8814fak8eVo','Territorialidades indigenas. Experiencias de resistencia en America Latina/Abya Yala'],
-        ['QBH5pzwDbeU','Configuraciones culturales y teoria de la hegemonia en America Latina'],
-        ['8NptIcNtETg','El quiebre del horizonte de la integracion autonoma en America Latina y el Caribe'],
-        ['waZJlzJygxM','Conversatorio Bolivia en la coyuntura politica contemporanea'],
-        ['xjU0Jw7thsU','Conversatorio con Sergio Ramirez: El acto de la escritura en Centroamerica'],
-    ];
-    $videos = array_map(function($v) { return ['id' => $v[0], 'title' => $v[1]]; }, $videos_raw);
+    $videos = cesmeca_get_youtube_videos('marti');
 
     ob_start();
     ?>
