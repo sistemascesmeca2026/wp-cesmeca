@@ -13,3 +13,5 @@ wp-content/cache/
 
 # Otros
 docker-compose.yml.bak-*
+scripts/.env-youtube
+scripts/youtube-cache/
