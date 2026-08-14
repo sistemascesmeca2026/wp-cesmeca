@@ -19,7 +19,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ENV_FILE="${YOUTUBE_ENV_FILE:-$SCRIPT_DIR/.env-youtube}"
-OUT_DIR="${YOUTUBE_OUT_DIR:-$SCRIPT_DIR/youtube-cache}"
+OUT_DIR="${YOUTUBE_OUT_DIR:-$SCRIPT_DIR/../wp-content/uploads/youtube-cache}"
 
 if [ ! -f "$ENV_FILE" ]; then
   echo "ERROR: no se encontró $ENV_FILE (debe contener DEVELOPER_KEY=...)" >&2
@@ -72,7 +72,7 @@ for prefix in "${!PLAYLISTS[@]}"; do
     continue
   fi
 
-  mv "$tmp_file" "$out_file"
+  mv -f "$tmp_file" "$out_file"
   echo "  OK -> $out_file"
 done
 
