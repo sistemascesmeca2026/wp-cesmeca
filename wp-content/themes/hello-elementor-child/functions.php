@@ -1174,3 +1174,836 @@ function cesmeca_get_youtube_videos($prefix, $limit = 50) {
     }
     return array_slice($videos, 0, $limit);
 }
+
+function cesmeca_registrar_cpt_galeria() {
+    register_post_type('cesmeca_galeria_item', array(
+        'labels' => array(
+            'name'          => 'Items de Galería',
+            'singular_name' => 'Item de Galería',
+            'add_new_item'  => 'Agregar imagen',
+            'edit_item'     => 'Editar imagen',
+            'all_items'     => 'Items de Galería',
+        ),
+        'public'       => false,
+        'show_ui'      => true,
+        'show_in_menu' => true,
+        'menu_icon'    => 'dashicons-format-gallery',
+        'supports'     => array('title', 'thumbnail', 'page-attributes'),
+        'hierarchical' => false,
+    ));
+}
+add_action('init', 'cesmeca_registrar_cpt_galeria');
+
+function cesmeca_registrar_taxonomia_galeria_pagina() {
+    register_taxonomy('galeria_pagina', 'cesmeca_galeria_item', array(
+        'labels' => array(
+            'name'          => 'Páginas',
+            'singular_name' => 'Página',
+        ),
+        'hierarchical' => true,
+        'show_ui'      => true,
+        'show_admin_column' => true,
+    ));
+}
+add_action('init', 'cesmeca_registrar_taxonomia_galeria_pagina');
+
+function cesmeca_registrar_taxonomia_galeria_pestana() {
+    register_taxonomy('galeria_pestana', 'cesmeca_galeria_item', array(
+        'labels' => array(
+            'name'          => 'Pestañas',
+            'singular_name' => 'Pestaña',
+        ),
+        'hierarchical' => true,
+        'show_ui'      => true,
+        'show_admin_column' => true,
+    ));
+}
+add_action('init', 'cesmeca_registrar_taxonomia_galeria_pestana');
+
+function cesmeca_precargar_paginas_galeria() {
+    if (get_option('cesmeca_paginas_galeria_precargadas')) return;
+    $paginas = array('merc' => 'Cátedra Mercedes Olivera', 'lacem' => 'LACEM', 'semhist' => 'Seminario Historia', 'laud' => 'LAUD', 'marti' => 'Cátedra Martí', 'eac' => 'EAC', 'laboratoria' => 'Laboratoria', 'reveldia' => 'ReVeldía');
+    foreach ($paginas as $slug => $nombre) {
+        if (!term_exists($slug, 'galeria_pagina')) {
+            wp_insert_term($nombre, 'galeria_pagina', array('slug' => $slug));
+        }
+    }
+    update_option('cesmeca_paginas_galeria_precargadas', 1);
+}
+add_action('init', 'cesmeca_precargar_paginas_galeria', 20);
+
+function cesmeca_get_galeria_imagenes($pagina_slug, $pestana_slug = null) {
+    $args = array(
+        'post_type' => 'cesmeca_galeria_item',
+        'posts_per_page' => -1,
+        'orderby' => 'menu_order',
+        'order' => 'ASC',
+        'tax_query' => array(
+            array('taxonomy' => 'galeria_pagina', 'field' => 'slug', 'terms' => $pagina_slug),
+        ),
+    );
+    if ($pestana_slug) {
+        $args['tax_query'][] = array('taxonomy' => 'galeria_pestana', 'field' => 'slug', 'terms' => $pestana_slug);
+    }
+    $posts = get_posts($args);
+    $items = array();
+    foreach ($posts as $p) {
+        $src = get_the_post_thumbnail_url($p->ID, 'large');
+        if (!$src) continue;
+        $items[] = array('src' => $src, 'alt' => get_the_title($p->ID));
+    }
+    return $items;
+}
+
+function cesmeca_migrar_galeria_mercedes_once() {
+    if (get_option('cesmeca_galeria_mercedes_migrada')) return;
+    if (!current_user_can('manage_options')) return;
+    if (!isset($_GET['cesmeca_migrar_mercedes'])) return;
+
+    $imagenes = [
+        '/wp-content/uploads/cesmeca-legacy/2018/00/CatMercedes20181.jpg',
+        '/wp-content/uploads/cesmeca-legacy/2018/00/CatMercedes20182.jpg',
+        '/wp-content/uploads/cesmeca-legacy/2018/00/CatMercedes20183.jpg',
+        '/wp-content/uploads/cesmeca-legacy/2018/00/CatMercedes20184.jpg',
+        '/wp-content/uploads/cesmeca-legacy/2018/00/CatMercedes20185.jpg',
+        '/wp-content/uploads/cesmeca-legacy/2019/10/21/Propuesta_Conferencia_Aida_Hern%C3%A1ndez.png',
+        '/wp-content/uploads/cesmeca-legacy/2019/00/Ciclo_de_conferencias_Magistrales.jpg',
+        '/wp-content/uploads/cesmeca-legacy/2019/00/Conferencia_Raquel_Gutirrez.jpg',
+        '/wp-content/uploads/cesmeca-legacy/2019/00/Foro_el_teatro_popular.jpg',
+        '/wp-content/uploads/cesmeca-legacy/2019/00/mujeres-en-defensa-de-la-tierra.jpg',
+        '/wp-content/uploads/cesmeca-legacy/2020/02/06/JORNADA_Semi%C3%B3ticas_Corporales-02.png',
+        '/wp-content/uploads/cesmeca-legacy/2020/10/08/Capitalismo_gore_y_transfeminismos-2020.png',
+        '/wp-content/uploads/cesmeca-legacy/actualizacion_2025/catedra_mercedes_olivera/Conv_1.jpg',
+        '/wp-content/uploads/cesmeca-legacy/actualizacion_2025/catedra_mercedes_olivera/Conv_2.jpg',
+        '/wp-content/uploads/cesmeca-legacy/actualizacion_2025/catedra_mercedes_olivera/ExposicinFotog.jpg',
+        '/wp-content/uploads/cesmeca-legacy/actualizacion_2025/catedra_mercedes_olivera/Mara_Viveros.jpg',
+        '/wp-content/uploads/cesmeca-legacy/actualizacion_2025/catedra_mercedes_olivera/Resonando_desde_el_sur.jpg',
+    ];
+
+    $orden = 0;
+    $creadas = 0;
+    foreach ($imagenes as $ruta) {
+        $ruta_decodificada = urldecode($ruta);
+        $archivo_absoluto = ABSPATH . ltrim($ruta_decodificada, '/');
+        if (!file_exists($archivo_absoluto)) {
+            error_log("Migrar Mercedes: archivo no encontrado: $archivo_absoluto");
+            continue;
+        }
+
+        // Buscar si ya existe un adjunto para este archivo
+        $guid = site_url($ruta_decodificada);
+        $existente = get_posts([
+            'post_type' => 'attachment',
+            'meta_query' => [],
+            'guid' => $guid,
+            'posts_per_page' => 1,
+        ]);
+        // get_posts no filtra bien por guid directo, usar WP_Query con 'guid' via SQL alterno:
+        global $wpdb;
+        $attachment_id = $wpdb->get_var($wpdb->prepare(
+            "SELECT ID FROM $wpdb->posts WHERE post_type='attachment' AND guid=%s LIMIT 1",
+            $guid
+        ));
+
+        if (!$attachment_id) {
+            $filetype = wp_check_filetype(basename($archivo_absoluto), null);
+            $attachment = [
+                'guid' => $guid,
+                'post_mime_type' => $filetype['type'],
+                'post_title' => sanitize_file_name(basename($archivo_absoluto)),
+                'post_content' => '',
+                'post_status' => 'inherit',
+            ];
+            $attachment_id = wp_insert_attachment($attachment, $archivo_absoluto);
+            if (!is_wp_error($attachment_id) && $attachment_id) {
+                require_once ABSPATH . 'wp-admin/includes/image.php';
+                $attach_data = wp_generate_attachment_metadata($attachment_id, $archivo_absoluto);
+                wp_update_attachment_metadata($attachment_id, $attach_data);
+            }
+        }
+
+        if (!$attachment_id || is_wp_error($attachment_id)) {
+            error_log("Migrar Mercedes: fallo al crear adjunto para $archivo_absoluto");
+            continue;
+        }
+
+        $orden++;
+        $post_id = wp_insert_post([
+            'post_type' => 'cesmeca_galeria_item',
+            'post_title' => 'Agenda académica Mercedes ' . $orden,
+            'post_status' => 'publish',
+            'menu_order' => $orden,
+        ]);
+        if ($post_id && !is_wp_error($post_id)) {
+            set_post_thumbnail($post_id, $attachment_id);
+            wp_set_object_terms($post_id, 'merc', 'galeria_pagina');
+            $creadas++;
+        }
+    }
+
+    update_option('cesmeca_galeria_mercedes_migrada', 1);
+    wp_die("Migración completa. $creadas imágenes creadas de " . count($imagenes) . " totales.");
+}
+add_action('admin_init', 'cesmeca_migrar_galeria_mercedes_once');
+
+function cesmeca_actualizar_contenido_mercedes_once() {
+    if (get_option('cesmeca_contenido_mercedes_actualizado')) return;
+    if (!current_user_can('manage_options')) return;
+    if (!isset($_GET['cesmeca_actualizar_contenido_mercedes'])) return;
+
+    $contenido = '<!-- wp:heading {"level":3} -->
+<h3>Descripción</h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>La Cátedra de Estudios de Género y Feminismos "Mercedes Olivera" nació en 2013, en el marco de los Posgrados en Estudios e Intervención Feministas, con el propósito de articular la vida académica e intelectual universitaria con la sociedad civil y las organizaciones sociales de Chiapas, la región sur-sureste de México, Centroamérica y el Caribe.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Desde 2022, la Cátedra se ha enfocado en generar espacios de diálogo que fortalezcan los vínculos con los feminismos de los Sures Globales. Con el fin de continuar este giro epistémico, hemos invitado a colegas y referentes de estos feminismos para enriquecer la articulación teórico-política que impulsa nuestro trabajo.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>En 2025 contamos con la presencia de la Dra. Mara Viveros Vigoya, destacada pensadora feminista colombiana, quien visitará el Centro de Estudios Superiores de México y Centroamérica (CESMECA). Su participación nos permitirá reflexionar colectivamente —corazonar— sobre la comprensión del Sur Global y el lugar de la interseccionalidad dentro de los feminismos contemporáneos.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>El programa lleva por nombre &quot;Los Feminismos del Sur con…&quot;, un título pensado para construir un marco de diálogos epistémicos desde la Cátedra. Cada invitada forma parte del margen epistémico del Sur, y consideramos que estos espacios de formación, basados en dichas epistemologías, fortalecen y distinguen la propuesta académica del posgrado.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>La Dra. Mara Viveros Vigoya es profesora del Departamento de Antropología y de la Escuela de Estudios de Género de la Universidad Nacional de Colombia. Su trabajo se ha centrado en los estudios de género, la perspectiva interseccional, la raza y la sexualidad, así como en el análisis de las clases medias negras en Colombia, entre otros temas relevantes.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"level":3} -->
+<h3>Coordinadora</h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Dra. Delmy Tania Cruz Hernández</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"level":3} -->
+<h3>Retribución Social</h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Larissa Fuentes Machorro</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"level":3} -->
+<h3>Comité</h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>En conformación</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:shortcode -->
+[catedra_mercedes_page]
+<!-- /wp:shortcode -->';
+
+    $resultado = wp_update_post([
+        'ID' => 1703,
+        'post_content' => $contenido,
+    ], true);
+
+    // Asignar el logo como imagen destacada, si no la tiene
+    if (!has_post_thumbnail(1703)) {
+        $logo_path = ABSPATH . 'wp-content/uploads/cesmeca-legacy/actualizacion_2025/catedra_mercedes_olivera/LOGO.png';
+        if (file_exists($logo_path)) {
+            $guid = site_url('/wp-content/uploads/cesmeca-legacy/actualizacion_2025/catedra_mercedes_olivera/LOGO.png');
+            global $wpdb;
+            $attachment_id = $wpdb->get_var($wpdb->prepare(
+                "SELECT ID FROM $wpdb->posts WHERE post_type='attachment' AND guid=%s LIMIT 1", $guid
+            ));
+            if (!$attachment_id) {
+                $filetype = wp_check_filetype('LOGO.png', null);
+                $attachment_id = wp_insert_attachment([
+                    'guid' => $guid,
+                    'post_mime_type' => $filetype['type'],
+                    'post_title' => 'LOGO Cátedra Mercedes',
+                    'post_status' => 'inherit',
+                ], $logo_path);
+                if (!is_wp_error($attachment_id)) {
+                    require_once ABSPATH . 'wp-admin/includes/image.php';
+                    $attach_data = wp_generate_attachment_metadata($attachment_id, $logo_path);
+                    wp_update_attachment_metadata($attachment_id, $attach_data);
+                }
+            }
+            if ($attachment_id && !is_wp_error($attachment_id)) {
+                set_post_thumbnail(1703, $attachment_id);
+            }
+        }
+    }
+
+    update_option('cesmeca_contenido_mercedes_actualizado', 1);
+    if (is_wp_error($resultado)) {
+        wp_die('ERROR: ' . $resultado->get_error_message());
+    }
+    wp_die('Contenido de la página 1703 actualizado correctamente. Logo asignado: ' . (has_post_thumbnail(1703) ? 'SÍ' : 'NO'));
+}
+add_action('admin_init', 'cesmeca_actualizar_contenido_mercedes_once');
+
+function cesmeca_prepend_logo_flotante($content) {
+    if (!is_page() || !has_post_thumbnail() || !in_the_loop() || !is_main_query()) return $content;
+    global $post;
+    $shortcodes_galeria = ['catedra_mercedes_page', 'lacem_page', 'seminario_historia_page', 'laud_page', 'catedra_marti_page'];
+    $tiene_shortcode = false;
+    foreach ($shortcodes_galeria as $sc) {
+        if (has_shortcode($post->post_content, $sc)) { $tiene_shortcode = true; break; }
+    }
+    if (!$tiene_shortcode) return $content;
+
+    $logo_url = get_the_post_thumbnail_url($post->ID, 'medium');
+    $logo_html = '<div class="cesmeca-logo-flotante"><img src="' . esc_url($logo_url) . '" alt="Logo"></div>';
+    return $logo_html . $content;
+}
+add_filter('the_content', 'cesmeca_prepend_logo_flotante', 5);
+
+function cesmeca_migrar_galeria_lacem_once() {
+    if (get_option('cesmeca_galeria_lacem_migrada')) return;
+    if (!current_user_can('manage_options')) return;
+    if (!isset($_GET['cesmeca_migrar_lacem'])) return;
+
+    if (!term_exists('actividades-2023', 'galeria_pestana')) {
+        wp_insert_term('Actividades 2022-2023', 'galeria_pestana', ['slug' => 'actividades-2023']);
+    }
+    if (!term_exists('actividades-2021', 'galeria_pestana')) {
+        wp_insert_term('Actividades 2015-2021', 'galeria_pestana', ['slug' => 'actividades-2021']);
+    }
+
+    $grupos = [
+        'actividades-2023' => [
+            '/wp-content/uploads/cesmeca-legacy/LACEM/memoria.jpg',
+            '/wp-content/uploads/cesmeca-legacy/LACEM/cartografia.jpg',
+        ],
+        'actividades-2021' => [
+            '/wp-content/uploads/cesmeca-legacy/2019/00/Conferencia_Aztecas_en_la_nube_de_puntos_.jpg',
+            '/wp-content/uploads/cesmeca-legacy/2019/10/07/ciudad-de-vacaciones.png',
+            '/wp-content/uploads/cesmeca-legacy/2019/00/Conferencia_Hector_Brignoli.jpg',
+            '/wp-content/uploads/cesmeca-legacy/2021/01/22/Sesion_Ceieg_cartel.png',
+            '/wp-content/uploads/cesmeca-legacy/2020/01/17/Transformaciones_territoriales_en_Chiapas.png',
+            '/wp-content/uploads/cesmeca-legacy/2021/04/27/Foro_Atlas_de_Genero.png',
+            '/wp-content/uploads/cesmeca-legacy/2020/09/11/Cartel_interpretaciones_cartograficas_.png',
+            '/wp-content/uploads/cesmeca-legacy/2020/00/Curso_SIG_CienciasS.png',
+            '/wp-content/uploads/cesmeca-legacy/2020/11/10/Foro_Mapas_para_armar_final.png',
+            '/wp-content/uploads/cesmeca-legacy/2021/03/10/Cartel_Guatemala_en_Datos.png',
+            '/wp-content/uploads/cesmeca-legacy/2021/09/10/Sesiones-INEGI-LACEM21.png',
+        ],
+    ];
+
+    $creadas = 0;
+    $total = 0;
+    global $wpdb;
+    foreach ($grupos as $pestana_slug => $imagenes) {
+        $orden = 0;
+        foreach ($imagenes as $ruta) {
+            $total++;
+            $ruta_decodificada = urldecode($ruta);
+            $archivo_absoluto = ABSPATH . ltrim($ruta_decodificada, '/');
+            if (!file_exists($archivo_absoluto)) {
+                error_log("Migrar LACEM: archivo no encontrado: $archivo_absoluto");
+                continue;
+            }
+            $guid = site_url($ruta_decodificada);
+            $attachment_id = $wpdb->get_var($wpdb->prepare(
+                "SELECT ID FROM $wpdb->posts WHERE post_type='attachment' AND guid=%s LIMIT 1", $guid
+            ));
+            if (!$attachment_id) {
+                $filetype = wp_check_filetype(basename($archivo_absoluto), null);
+                $attachment_id = wp_insert_attachment([
+                    'guid' => $guid,
+                    'post_mime_type' => $filetype['type'],
+                    'post_title' => sanitize_file_name(basename($archivo_absoluto)),
+                    'post_status' => 'inherit',
+                ], $archivo_absoluto);
+                if (!is_wp_error($attachment_id) && $attachment_id) {
+                    require_once ABSPATH . 'wp-admin/includes/image.php';
+                    $attach_data = wp_generate_attachment_metadata($attachment_id, $archivo_absoluto);
+                    wp_update_attachment_metadata($attachment_id, $attach_data);
+                }
+            }
+            if (!$attachment_id || is_wp_error($attachment_id)) {
+                error_log("Migrar LACEM: fallo al crear adjunto para $archivo_absoluto");
+                continue;
+            }
+            $orden++;
+            $post_id = wp_insert_post([
+                'post_type' => 'cesmeca_galeria_item',
+                'post_title' => 'LACEM ' . $pestana_slug . ' ' . $orden,
+                'post_status' => 'publish',
+                'menu_order' => $orden,
+            ]);
+            if ($post_id && !is_wp_error($post_id)) {
+                set_post_thumbnail($post_id, $attachment_id);
+                wp_set_object_terms($post_id, 'lacem', 'galeria_pagina');
+                wp_set_object_terms($post_id, $pestana_slug, 'galeria_pestana');
+                $creadas++;
+            }
+        }
+    }
+
+    update_option('cesmeca_galeria_lacem_migrada', 1);
+    wp_die("Migración LACEM completa. $creadas imágenes creadas de $total totales.");
+}
+add_action('admin_init', 'cesmeca_migrar_galeria_lacem_once');
+
+function cesmeca_actualizar_contenido_lacem_once() {
+    if (get_option('cesmeca_contenido_lacem_actualizado')) return;
+    if (!current_user_can('manage_options')) return;
+    if (!isset($_GET['cesmeca_actualizar_contenido_lacem'])) return;
+
+    $contenido = '<!-- wp:heading -->
+<h1>Laboratorio de Cartografia y Elaboracion de Mapas (LACEM)</h1>
+<!-- /wp:heading -->
+
+<!-- wp:heading {"level":3} -->
+<h3>Presentacion</h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>El LACEM se estableció en 2015 con el objetivo principal de dotar a los proyectos de investigación desarrollados en el CESMECA, del entorno de trabajo y las herramientas que les posibiliten desplegar sus temáticas de manera espacial por medio de representaciones cartográficas de alta calidad. Además de ser considerado como un espacio de creación, edición, acopio y difusión de mapas digitales, como físicos, especialmente de temáticas relacionadas con las ciencias sociales y humanidades.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>De este modo, en la línea de investigación aplicada: <strong>Perspectivas globales en la historia de Chiapas, Centroamérica y el Caribe, épocas moderna y contemporánea</strong>, buscamos reorganizar las actividades y funciones del laboratorio, con el fin de mantener los objetivos de este espacio y potenciar el trabajo colaborativo con estudiantes, investigadores, centros públicos CONACyT e institucionales de la UNICACH.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"level":3} -->
+<h3>Objetivos</h3>
+<!-- /wp:heading -->
+
+<!-- wp:list -->
+<ul>
+<li>Desarrollar el LACEM como un proyecto institucional del CESMECA que atienda la demanda del uso de tecnologías para el manejo y proyección de información geográfica.</li>
+<li>Buscar la interdisciplinariedad del LACEM en especial con la antropologia, la historia, la sociologia y los estudios de genero.</li>
+<li>Gestionar y proponer posibles soluciones a las problemáticas sociales de Chiapas y Centroamérica a partir del uso de las herramientas SIG.</li>
+<li>Ofrecer herramientas para mejorar los análisis sociales, económicos, culturales y de género desde una perspectiva histórica y contemporánea.</li>
+<li>Configurar un espacio de formación y práctica para estudiantes, investigadores y el público en general.</li>
+<li>Contribuir a la difusión de las investigaciones de la línea de investigación y de los análisis creados por el CESMECA.</li>
+</ul>
+<!-- /wp:list -->
+
+<!-- wp:heading {"level":3} -->
+<h3>Coordinadores</h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Dr. Mario Eduardo Valdez Gordillo</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Dr. Armando Mendez Zarate</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"level":3} -->
+<h3>Contacto</h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p><a href="mailto:lacem@unicach.mx">lacem@unicach.mx</a></p>
+<!-- /wp:paragraph -->
+
+<!-- wp:shortcode -->
+[lacem_page]
+<!-- /wp:shortcode -->';
+
+    $resultado = wp_update_post([
+        'ID' => 1690,
+        'post_content' => $contenido,
+    ], true);
+
+    if (!has_post_thumbnail(1690)) {
+        $logo_path = ABSPATH . 'wp-content/uploads/cesmeca-legacy/2019/08/22/lacem.png';
+        if (file_exists($logo_path)) {
+            $guid = site_url('/wp-content/uploads/cesmeca-legacy/2019/08/22/lacem.png');
+            global $wpdb;
+            $attachment_id = $wpdb->get_var($wpdb->prepare(
+                "SELECT ID FROM $wpdb->posts WHERE post_type='attachment' AND guid=%s LIMIT 1", $guid
+            ));
+            if (!$attachment_id) {
+                $filetype = wp_check_filetype('lacem.png', null);
+                $attachment_id = wp_insert_attachment([
+                    'guid' => $guid,
+                    'post_mime_type' => $filetype['type'],
+                    'post_title' => 'LOGO LACEM',
+                    'post_status' => 'inherit',
+                ], $logo_path);
+                if (!is_wp_error($attachment_id)) {
+                    require_once ABSPATH . 'wp-admin/includes/image.php';
+                    $attach_data = wp_generate_attachment_metadata($attachment_id, $logo_path);
+                    wp_update_attachment_metadata($attachment_id, $attach_data);
+                }
+            }
+            if ($attachment_id && !is_wp_error($attachment_id)) {
+                set_post_thumbnail(1690, $attachment_id);
+            }
+        }
+    }
+
+    update_option('cesmeca_contenido_lacem_actualizado', 1);
+    if (is_wp_error($resultado)) {
+        wp_die('ERROR: ' . $resultado->get_error_message());
+    }
+    wp_die('Contenido de la página 1690 (LACEM) actualizado. Logo asignado: ' . (has_post_thumbnail(1690) ? 'SÍ' : 'NO'));
+}
+add_action('admin_init', 'cesmeca_actualizar_contenido_lacem_once');
+
+function cesmeca_migrar_galeria_semhist_once() {
+    if (get_option('cesmeca_galeria_semhist_migrada')) return;
+    if (!current_user_can('manage_options')) return;
+    if (!isset($_GET['cesmeca_migrar_semhist'])) return;
+
+    $imagenes = [
+        ['/wp-content/uploads/cesmeca-legacy/2026/02/12/633259523_26439353935670993_5625947691991344746_n.jpg', 'Agenda seminario'],
+        ['/wp-content/uploads/cesmeca-legacy/2026/02/12/631744838_26439353942337659_4064999045065488171_n.jpg', 'Agenda seminario'],
+        ['/wp-content/uploads/cesmeca-legacy/2026/02/12/490469037_1217855590346032_1991189855996174867_n.jpg', 'Agenda seminario'],
+        ['/wp-content/uploads/cesmeca-legacy/2026/02/12/492069699_1053389130253056_4900088558451583392_n.jpg', 'Agenda seminario'],
+        ['/wp-content/uploads/cesmeca-legacy/2026/02/12/515439637_1338390048292585_3145956085056992701_n_1.jpg', 'Agenda seminario'],
+        ['/wp-content/uploads/cesmeca-legacy/2026/02/12/569035112_1394469272684662_7779209741331473144_n_1.jpg', 'Agenda seminario'],
+        ['/wp-content/uploads/cesmeca-legacy/2021/00/seminario-de-historia-2021-agosto-noviembre.png', 'Seminario agosto-noviembre 2021'],
+        ['/wp-content/uploads/cesmeca-legacy/2026/02/12/enero-mayo.2020CARTEL_s.jpg', 'Enero-mayo 2020'],
+        ['/wp-content/uploads/cesmeca-legacy/seminario_permanente/cartel-1ersemestre2018.jpg', 'Primer semestre 2018'],
+        ['/wp-content/uploads/cesmeca-legacy/seminario_permanente/2019.1er.semestre.jpg', 'Primer semestre 2019'],
+        ['/wp-content/uploads/cesmeca-legacy/seminario_permanente/cartel-segundo-semestre-2018.jpg', 'Segundo semestre 2018'],
+    ];
+
+    $orden = 0;
+    $creadas = 0;
+    global $wpdb;
+    foreach ($imagenes as $item) {
+        list($ruta, $alt) = $item;
+        $ruta_decodificada = urldecode($ruta);
+        $archivo_absoluto = ABSPATH . ltrim($ruta_decodificada, '/');
+        if (!file_exists($archivo_absoluto)) {
+            error_log("Migrar SemHist: archivo no encontrado: $archivo_absoluto");
+            continue;
+        }
+        $guid = site_url($ruta_decodificada);
+        $attachment_id = $wpdb->get_var($wpdb->prepare(
+            "SELECT ID FROM $wpdb->posts WHERE post_type='attachment' AND guid=%s LIMIT 1", $guid
+        ));
+        if (!$attachment_id) {
+            $filetype = wp_check_filetype(basename($archivo_absoluto), null);
+            $attachment_id = wp_insert_attachment([
+                'guid' => $guid,
+                'post_mime_type' => $filetype['type'],
+                'post_title' => sanitize_file_name(basename($archivo_absoluto)),
+                'post_status' => 'inherit',
+            ], $archivo_absoluto);
+            if (!is_wp_error($attachment_id) && $attachment_id) {
+                require_once ABSPATH . 'wp-admin/includes/image.php';
+                $attach_data = wp_generate_attachment_metadata($attachment_id, $archivo_absoluto);
+                wp_update_attachment_metadata($attachment_id, $attach_data);
+            }
+        }
+        if (!$attachment_id || is_wp_error($attachment_id)) {
+            error_log("Migrar SemHist: fallo al crear adjunto para $archivo_absoluto");
+            continue;
+        }
+        $orden++;
+        $post_id = wp_insert_post([
+            'post_type' => 'cesmeca_galeria_item',
+            'post_title' => $alt,
+            'post_status' => 'publish',
+            'menu_order' => $orden,
+        ]);
+        if ($post_id && !is_wp_error($post_id)) {
+            set_post_thumbnail($post_id, $attachment_id);
+            wp_set_object_terms($post_id, 'semhist', 'galeria_pagina');
+            $creadas++;
+        }
+    }
+
+    update_option('cesmeca_galeria_semhist_migrada', 1);
+    wp_die("Migración Seminario Historia completa. $creadas imágenes creadas de " . count($imagenes) . " totales.");
+}
+add_action('admin_init', 'cesmeca_migrar_galeria_semhist_once');
+
+function cesmeca_actualizar_contenido_semhist_once() {
+    if (get_option('cesmeca_contenido_semhist_actualizado')) return;
+    if (!current_user_can('manage_options')) return;
+    if (!isset($_GET['cesmeca_actualizar_contenido_semhist'])) return;
+
+    $contenido = '<!-- wp:heading {"level":3} -->
+<h3>Descripcion</h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>El Seminario Permanente de Historia de Chiapas y Centroamérica se trata de un esfuerzo interinstitucional en el que participan estudiosos de la historia (profesores y estudiantes de posgrado) adscritos a las siguientes instancias académicas de San Cristóbal de Las Casas, Chiapas:</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>- El Centro de Estudios Superiores de México y Centroamérica de la Universidad de Ciencias y Artes de Chiapas (CESMECA-UNICACH).<br>- El Centro de investigaciones Multidisciplinarias sobre Chiapas y Centroamérica de la Universidad Nacional Autónoma de México (CIMSUR-UNAM).<br>- El Centro de Investigaciones y Estudios Superiores en Antropologia Social (CIESAS) Unidad Sureste.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Quienes participan en el seminario se reunen una vez al mes desde su creacion, en abril de 2016.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>El objetivo principal del seminario es conocer los campos de investigación de cada integrante, compartir el análisis de la historia que se estudia en la región, y, a partir del análisis colectivo por pares de los trabajos, incrementar la calidad y el alcance de los aportes de investigación que redunde en beneficio de la historia regional. Asimismo, se coordinan eventos académicos vinculados con investigaciones sobre historia de Chiapas y de América Central.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"level":3} -->
+<h3>Coordinadores</h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>- Dr. Aaron Pollack (CIESAS Unidad Sureste)<br>- Dr. Mario E. Valdez Gordillo (CESMECA)<br>- Dr. Gerardo Monterrosa Cubias (CIMSUR)</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:shortcode -->
+[seminario_historia_page]
+<!-- /wp:shortcode -->';
+
+    $resultado = wp_update_post([
+        'ID' => 1696,
+        'post_content' => $contenido,
+    ], true);
+
+    update_option('cesmeca_contenido_semhist_actualizado', 1);
+    if (is_wp_error($resultado)) {
+        wp_die('ERROR: ' . $resultado->get_error_message());
+    }
+    wp_die('Contenido de la página 1696 (Seminario Historia) actualizado correctamente.');
+}
+add_action('admin_init', 'cesmeca_actualizar_contenido_semhist_once');
+
+function cesmeca_migrar_galeria_laud_once() {
+    if (get_option('cesmeca_galeria_laud_migrada')) return;
+    if (!current_user_can('manage_options')) return;
+    if (!isset($_GET['cesmeca_migrar_laud'])) return;
+
+    $base = '/wp-content/uploads/2026/06';
+    $imgs_raw = [
+        'laud_LAUD20171.jpg',
+        'laud_LAUD20181.jpg','laud_LAUD20182.jpg','laud_LAUD20183.jpg','laud_LAUD20184.jpg',
+        'laud_61356512_2486795461331641_8716390721390641152_o.jpg',
+        'laud_61376768_2487216434622877_6121429231277703168_o.jpg',
+        'laud_6tas_Jornadas_de_Afromexicanidad.jpg',
+        'laud_Conferencia_PabloChavarra_PECDA.jpg',
+        'laud_Converstario_6tas_Jornadas_de_Afromexicanidad.jpg',
+        'laud_muestra-de-cine-feminista-2019.jpg',
+        'laud_LAUD20191.jpg','laud_LAUD20192.jpg','laud_LAUD20193.jpg',
+        'laud_7Jornadas_Afrodecendencia2020.png',
+        'laud_Presentacin_de_proyectos_Aquelarre_LAUD.jpg',
+        'laud_taller-de-baile_6tas-jornadas-de-afromexicanidad.jpg',
+        'laud_Charlas_Videofnicas_1.jpg','laud_Charlas_videofnicas_2.jpg',
+        'laud_FotObservatorio.jpg',
+        'laud_Resiliencia-Resistencia_Mujeres-Negras_21.png',
+        'laud_7118b23a-4ebd-4dd6-9713-8b57634e8c72.jpg',
+        'laud_IMG-20180626-WA0002.jpg',
+        'laud_IMG_1144.jpg',
+        'laud_La_Caravana_Migrante-Expo_de_Jacob_Garcia_y_Rodrigo_Pardo.jpg',
+        'laud_8JornadasAfro3.png',
+        'laud_Banner-Conferencia_Sagrario_Cruz.png',
+        'laud_Banner-Conferencia_Sara_Islas.png',
+        'laud_Banner_Sagrario_Cruz.png',
+        'laud_Banner_Sara_Islas.png',
+        'laud_Laboratorio_de_Sonoridades.png',
+        'laud_Taller_de_Cine_Documental2021.png',
+        'laud_1-Arte_factor_social_Arte_factor_social_Arte_factor_social.png',
+        'laud_3_No-Mente_dibujo_de_rostro_No-Mente_dibujo_de_rostro.png',
+    ];
+
+    $orden = 0;
+    $creadas = 0;
+    global $wpdb;
+    foreach ($imgs_raw as $nombre) {
+        $ruta = $base . '/' . $nombre;
+        $archivo_absoluto = ABSPATH . ltrim($ruta, '/');
+        if (!file_exists($archivo_absoluto)) {
+            error_log("Migrar LAUD: archivo no encontrado: $archivo_absoluto");
+            continue;
+        }
+        $guid = site_url($ruta);
+        $attachment_id = $wpdb->get_var($wpdb->prepare(
+            "SELECT ID FROM $wpdb->posts WHERE post_type='attachment' AND guid=%s LIMIT 1", $guid
+        ));
+        if (!$attachment_id) {
+            $filetype = wp_check_filetype($nombre, null);
+            $attachment_id = wp_insert_attachment([
+                'guid' => $guid,
+                'post_mime_type' => $filetype['type'],
+                'post_title' => sanitize_file_name($nombre),
+                'post_status' => 'inherit',
+            ], $archivo_absoluto);
+            if (!is_wp_error($attachment_id) && $attachment_id) {
+                require_once ABSPATH . 'wp-admin/includes/image.php';
+                $attach_data = wp_generate_attachment_metadata($attachment_id, $archivo_absoluto);
+                wp_update_attachment_metadata($attachment_id, $attach_data);
+            }
+        }
+        if (!$attachment_id || is_wp_error($attachment_id)) {
+            error_log("Migrar LAUD: fallo al crear adjunto para $archivo_absoluto");
+            continue;
+        }
+        $orden++;
+        $post_id = wp_insert_post([
+            'post_type' => 'cesmeca_galeria_item',
+            'post_title' => 'LAUD ' . $orden,
+            'post_status' => 'publish',
+            'menu_order' => $orden,
+        ]);
+        if ($post_id && !is_wp_error($post_id)) {
+            set_post_thumbnail($post_id, $attachment_id);
+            wp_set_object_terms($post_id, 'laud', 'galeria_pagina');
+            $creadas++;
+        }
+    }
+
+    update_option('cesmeca_galeria_laud_migrada', 1);
+    wp_die("Migración LAUD completa. $creadas imágenes creadas de " . count($imgs_raw) . " totales.");
+}
+add_action('admin_init', 'cesmeca_migrar_galeria_laud_once');
+
+function cesmeca_migrar_galeria_marti_once() {
+    if (get_option('cesmeca_galeria_marti_migrada')) return;
+    if (!current_user_can('manage_options')) return;
+    if (!isset($_GET['cesmeca_migrar_marti'])) return;
+
+    $imagenes = [
+        '/wp-content/uploads/cesmeca-legacy/2014/00/CAtMart20141.jpg',
+        '/wp-content/uploads/cesmeca-legacy/2017/00/CAtMart20171.jpg',
+        '/wp-content/uploads/cesmeca-legacy/2018/00/CAtMart20181.jpg',
+        '/wp-content/uploads/cesmeca-legacy/2018/00/CAtMart20183.jpg',
+        '/wp-content/uploads/cesmeca-legacy/2019/00/Conferencia_Balam_Rodrigo.jpg',
+        '/wp-content/uploads/cesmeca-legacy/2019/00/Conferencia_Eckart_Boege.jpg',
+        '/wp-content/uploads/cesmeca-legacy/2019/00/Conferencia_Enrique_Saforcada.jpg',
+        '/wp-content/uploads/cesmeca-legacy/2019/00/Conferencia_Fabiola_Escarzaga.jpg',
+        '/wp-content/uploads/cesmeca-legacy/2019/00/Conferencia_Leticia_Salomn.jpg',
+        '/wp-content/uploads/cesmeca-legacy/2019/00/Conferencia_Reviviendo_los_sonidos_mayas.png',
+        '/wp-content/uploads/cesmeca-legacy/2019/00/memorias-no-antropocentricas-guerra-en-colombia.jpg',
+        '/wp-content/uploads/cesmeca-legacy/2019/00/Conferencia_Javier_Vidal_y_Roque_Moreno.jpg',
+        '/wp-content/uploads/cesmeca-legacy/2020/08/21/SergioRam-CatedraMart.png',
+        '/wp-content/uploads/cesmeca-legacy/2020/10/08/Capitalismo_gore_y_transfeminismos-2020.png',
+        '/wp-content/uploads/cesmeca-legacy/2019/00/Conferencia_Hector_Brignoli.jpg',
+        '/wp-content/uploads/cesmeca-legacy/2020/12/06/Pablo_pachakuti.png',
+    ];
+
+    $orden = 0;
+    $creadas = 0;
+    global $wpdb;
+    foreach ($imagenes as $ruta) {
+        $ruta_decodificada = urldecode($ruta);
+        $archivo_absoluto = ABSPATH . ltrim($ruta_decodificada, '/');
+        if (!file_exists($archivo_absoluto)) {
+            error_log("Migrar Marti: archivo no encontrado: $archivo_absoluto");
+            continue;
+        }
+        $guid = site_url($ruta_decodificada);
+        $attachment_id = $wpdb->get_var($wpdb->prepare(
+            "SELECT ID FROM $wpdb->posts WHERE post_type='attachment' AND guid=%s LIMIT 1", $guid
+        ));
+        if (!$attachment_id) {
+            $filetype = wp_check_filetype(basename($archivo_absoluto), null);
+            $attachment_id = wp_insert_attachment([
+                'guid' => $guid,
+                'post_mime_type' => $filetype['type'],
+                'post_title' => sanitize_file_name(basename($archivo_absoluto)),
+                'post_status' => 'inherit',
+            ], $archivo_absoluto);
+            if (!is_wp_error($attachment_id) && $attachment_id) {
+                require_once ABSPATH . 'wp-admin/includes/image.php';
+                $attach_data = wp_generate_attachment_metadata($attachment_id, $archivo_absoluto);
+                wp_update_attachment_metadata($attachment_id, $attach_data);
+            }
+        }
+        if (!$attachment_id || is_wp_error($attachment_id)) {
+            error_log("Migrar Marti: fallo al crear adjunto para $archivo_absoluto");
+            continue;
+        }
+        $orden++;
+        $post_id = wp_insert_post([
+            'post_type' => 'cesmeca_galeria_item',
+            'post_title' => 'Cátedra Martí ' . $orden,
+            'post_status' => 'publish',
+            'menu_order' => $orden,
+        ]);
+        if ($post_id && !is_wp_error($post_id)) {
+            set_post_thumbnail($post_id, $attachment_id);
+            wp_set_object_terms($post_id, 'marti', 'galeria_pagina');
+            $creadas++;
+        }
+    }
+
+    update_option('cesmeca_galeria_marti_migrada', 1);
+    wp_die("Migración Martí completa. $creadas imágenes creadas de " . count($imagenes) . " totales.");
+}
+add_action('admin_init', 'cesmeca_migrar_galeria_marti_once');
+
+function cesmeca_actualizar_contenido_marti_once() {
+    if (get_option('cesmeca_contenido_marti_actualizado')) return;
+    if (!current_user_can('manage_options')) return;
+    if (!isset($_GET['cesmeca_actualizar_contenido_marti'])) return;
+
+    $contenido = '<!-- wp:heading {"level":3} -->
+<h3>Descripción</h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>En enero de 2014 el CESMECA impulsó la creación de la Cátedra de Pensamiento Social José Martí, cuyo objetivo responde al compromiso universitario de fortalecer la vinculación y extensión de los conocimientos, saberes y reflexiones que derivan del pensamiento social, político, cultural y humanístico de Nuestra América-Abya Yala.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>El CESMECA, a través de esta Cátedra de Pensamiento Social y situado desde Centroamérica, el Caribe y el área sur sureste de México, mira, interpela y reflexiona desde una mirada histórica la contemporaneidad de los problemas sociales que aquejan a la región, además de que reconoce críticamente las virtudes de los pensamientos latinoamericanos y caribeños que han tejido la configuración cultural de nuestros pueblos.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>Para ello, impulsa conferencias magistrales, seminarios especializados, coloquios y talleres con destacados intelectuales, académicas y académicos de la región.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"level":3} -->
+<h3>Coordinador e integrantes</h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Consejo Honorífico:<br>Gilberto Valdes (Instituto de Filosofía de La Habana y GALFISA, Cuba)<br>Jaime Preciado Coronado (Universidad de Guadalajara, México)<br>Luciano Concheiro (Universidad Autónoma de México-Xochimilco, México)<br>Sergio Ramírez (Narrador, ensayista, periodista, político y abogado nicaragüense)</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:shortcode -->
+[catedra_marti_page]
+<!-- /wp:shortcode -->';
+
+    $resultado = wp_update_post([
+        'ID' => 1702,
+        'post_content' => $contenido,
+    ], true);
+
+    if (!has_post_thumbnail(1702)) {
+        $logo_path = ABSPATH . 'wp-content/uploads/cesmeca-legacy/catedras_laboratorios/Ctedr_Jos_Mart_Negro_Mesa_de_trabajo_1.png';
+        if (file_exists($logo_path)) {
+            $guid = site_url('/wp-content/uploads/cesmeca-legacy/catedras_laboratorios/Ctedr_Jos_Mart_Negro_Mesa_de_trabajo_1.png');
+            global $wpdb;
+            $attachment_id = $wpdb->get_var($wpdb->prepare(
+                "SELECT ID FROM $wpdb->posts WHERE post_type='attachment' AND guid=%s LIMIT 1", $guid
+            ));
+            if (!$attachment_id) {
+                $filetype = wp_check_filetype('Ctedr_Jos_Mart.png', null);
+                $attachment_id = wp_insert_attachment([
+                    'guid' => $guid,
+                    'post_mime_type' => $filetype['type'],
+                    'post_title' => 'LOGO Cátedra Martí',
+                    'post_status' => 'inherit',
+                ], $logo_path);
+                if (!is_wp_error($attachment_id)) {
+                    require_once ABSPATH . 'wp-admin/includes/image.php';
+                    $attach_data = wp_generate_attachment_metadata($attachment_id, $logo_path);
+                    wp_update_attachment_metadata($attachment_id, $attach_data);
+                }
+            }
+            if ($attachment_id && !is_wp_error($attachment_id)) {
+                set_post_thumbnail(1702, $attachment_id);
+            }
+        }
+    }
+
+    update_option('cesmeca_contenido_marti_actualizado', 1);
+    if (is_wp_error($resultado)) {
+        wp_die('ERROR: ' . $resultado->get_error_message());
+    }
+    wp_die('Contenido de la página 1702 (Martí) actualizado. Logo asignado: ' . (has_post_thumbnail(1702) ? 'SÍ' : 'NO'));
+}
+add_action('admin_init', 'cesmeca_actualizar_contenido_marti_once');

@@ -729,3 +729,23 @@ html, body {
 .page-content a.simple-btn:hover {
     background-color: #5a86a0;
 }
+
+.cesmeca-logo-flotante {
+  float: right;
+  max-width: 260px;
+  width: 100%;
+  margin: 0 0 20px 24px;
+}
+.cesmeca-logo-flotante img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+@media (max-width: 768px) {
+  .cesmeca-logo-flotante {
+    float: none;
+    max-width: 200px;
+    margin: 0 auto 20px;
+    display: block;
+  }
+}

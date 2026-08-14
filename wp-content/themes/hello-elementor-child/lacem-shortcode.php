@@ -8,10 +8,9 @@ function lacem_page_shortcode() {
         if (!empty($posts)) $eventos[] = ['post' => $posts[0], 'thumb' => $portadas_lacem[$jid] ?? ''];
     }
 
-    $actividades_2023 = [
-        ['src'=>'/wp-content/uploads/cesmeca-legacy/LACEM/memoria.jpg','alt'=>'Memoria y resistencia cartel'],
-        ['src'=>'/wp-content/uploads/cesmeca-legacy/LACEM/cartografia.jpg','alt'=>'Exposicion fotografica cartel'],
-    ];
+    $actividades_2023 = cesmeca_get_galeria_imagenes('lacem', 'actividades-2023');
+    $actividades_2021 = cesmeca_get_galeria_imagenes('lacem', 'actividades-2021');
+
     $todos_videos = cesmeca_get_youtube_videos('lacem');
     $videos_2023 = array_values(array_filter($todos_videos, function($v) {
         $year = $v['published'] ? (int) substr($v['published'], 0, 4) : 0;
@@ -21,51 +20,9 @@ function lacem_page_shortcode() {
         $year = $v['published'] ? (int) substr($v['published'], 0, 4) : 0;
         return $year >= 2015 && $year <= 2021;
     }));
-    $actividades_2021 = [
-        ['src'=>'/wp-content/uploads/cesmeca-legacy/2019/00/Conferencia_Aztecas_en_la_nube_de_puntos_.jpg','alt'=>'Aztecas en la nube de puntos'],
-        ['src'=>'/wp-content/uploads/cesmeca-legacy/2019/10/07/ciudad-de-vacaciones.png','alt'=>'Ciudad de Vacaciones'],
-        ['src'=>'/wp-content/uploads/cesmeca-legacy/2019/00/Conferencia_Hector_Brignoli.jpg','alt'=>'Conferencia Hector Brignoli'],
-        ['src'=>'/wp-content/uploads/cesmeca-legacy/2021/01/22/Sesion_Ceieg_cartel.png','alt'=>'Sesion CEIEG'],
-        ['src'=>'/wp-content/uploads/cesmeca-legacy/2020/01/17/Transformaciones_territoriales_en_Chiapas.png','alt'=>'Transformaciones territoriales en Chiapas'],
-        ['src'=>'/wp-content/uploads/cesmeca-legacy/2021/04/27/Foro_Atlas_de_Genero.png','alt'=>'Foro Atlas de Genero'],
-        ['src'=>'/wp-content/uploads/cesmeca-legacy/2020/09/11/Cartel_interpretaciones_cartograficas_.png','alt'=>'Curso Interpretaciones cartograficas'],
-        ['src'=>'/wp-content/uploads/cesmeca-legacy/2020/00/Curso_SIG_CienciasS.png','alt'=>'Curso SIG para Ciencias Sociales'],
-        ['src'=>'/wp-content/uploads/cesmeca-legacy/2020/11/10/Foro_Mapas_para_armar_final.png','alt'=>'Foro Mapas para armar'],
-        ['src'=>'/wp-content/uploads/cesmeca-legacy/2021/03/10/Cartel_Guatemala_en_Datos.png','alt'=>'Guatemala en datos'],
-        ['src'=>'/wp-content/uploads/cesmeca-legacy/2021/09/10/Sesiones-INEGI-LACEM21.png','alt'=>'Miercoles con el INEGI'],
-    ];
-
-    ob_start();
-    ?>
-    <div class="lacem-intro-text">
-      <h1>Laboratorio de Cartografia y Elaboracion de Mapas (LACEM)</h1>
-      <h3>Presentacion</h3>
-      <p>El LACEM se estableció en 2015 con el objetivo principal de dotar a los proyectos de investigación desarrollados en el CESMECA, del entorno de trabajo y las herramientas que les posibiliten desplegar sus temáticas de manera espacial por medio de representaciones cartográficas de alta calidad. Además de ser considerado como un espacio de creación, edición, acopio y difusión de mapas digitales, como físicos, especialmente de temáticas relacionadas con las ciencias sociales y humanidades.</p>
-      <p>De este modo, en la línea de investigación aplicada: <strong>Perspectivas globales en la historia de Chiapas, Centroamérica y el Caribe, épocas moderna y contemporánea</strong>, buscamos reorganizar las actividades y funciones del laboratorio, con el fin de mantener los objetivos de este espacio y potenciar el trabajo colaborativo con estudiantes, investigadores, centros públicos CONACyT e institucionales de la UNICACH.</p>
-      <h3>Objetivos</h3>
-      <ul>
-        <li>Desarrollar el LACEM como un proyecto institucional del CESMECA que atienda la demanda del uso de tecnologías para el manejo y proyección de información geográfica.</li>
-        <li>Buscar la interdisciplinariedad del LACEM en especial con la antropologia, la historia, la sociologia y los estudios de genero.</li>
-        <li>Gestionar y proponer posibles soluciones a las problemáticas sociales de Chiapas y Centroamérica a partir del uso de las herramientas SIG.</li>
-        <li>Ofrecer herramientas para mejorar los análisis sociales, económicos, culturales y de género desde una perspectiva histórica y contemporánea.</li>
-        <li>Configurar un espacio de formación y práctica para estudiantes, investigadores y el público en general.</li>
-        <li>Contribuir a la difusión de las investigaciones de la línea de investigación y de los análisis creados por el CESMECA.</li>
-      </ul>
-      <h3>Coordinadores</h3>
-      <p>Dr. Mario Eduardo Valdez Gordillo</p>
-      <p>Dr. Armando Mendez Zarate</p>
-      <h3>Contacto</h3>
-      <p><a href="mailto:lacem@unicach.mx">lacem@unicach.mx</a></p>
-    </div>
-    <div class="lacem-intro-img">
-      <img src="/wp-content/uploads/cesmeca-legacy/2019/08/22/lacem.png" alt="LACEM">
-    </div>
-    <?php
-    $intro_html = ob_get_clean();
 
     return cesmeca_render_gallery_tabs([
         'prefix' => 'lacem',
-        'intro_html' => $intro_html,
         'tabs' => [
             ['label' => 'Eventos', 'type' => 'posts', 'items' => $eventos],
             ['label' => 'Actividades 2022-2023', 'type' => 'images', 'items' => $actividades_2023],
