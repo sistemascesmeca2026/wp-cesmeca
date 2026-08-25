@@ -102,8 +102,9 @@ function inicio_page_shortcode() {
 .convoc-btn{background:#2563eb;color:#fff;padding:12px 28px;border-radius:6px;font-weight:700;text-decoration:none;font-size:1rem}
 @media(max-width:768px){.convoc-btn{padding:8px 16px;font-size:.85rem}}
 /* ===== FACEBOOK EMBED ===== */
-.fb-wrap{overflow:hidden;border-radius:8px}.fb-wrap iframe{margin-top:-10px;height:500px!important;border-radius:8px}
-.social-grid{display:grid;grid-template-columns:1fr 1fr;gap:32px;max-width:1400px;margin:0 auto;padding:0 24px 48px;min-width:0}
+.fb-wrap{overflow:hidden;border-radius:8px}
+.fb-wrap iframe{margin-top:0;height:600px!important;border-radius:8px}
+.social-grid{display:grid;grid-template-columns:1fr 1fr;gap:32px;max-width:1400px;margin:0 auto;padding:0 24px 48px;min-width:0;align-items:center}
 .social-col{min-width:0}
 .social-col h3{font-size:1.1rem;font-weight:700;color:#1a1a2e;text-transform:uppercase;margin-bottom:16px;display:flex;align-items:center;gap:8px}
 .social-col h3 span{color:#2563eb}
@@ -376,8 +377,8 @@ function inicio_page_shortcode() {
 <div class="social-grid">
   <div class="social-col">
     <h3>📘 SÍGUENOS EN <span>FACEBOOK</span></h3>
-    <div class="fb-wrap"><iframe src="https://www.facebook.com/plugins/page.php?href=https%3A%2F%2Fwww.facebook.com%2FCesmeca%2F&tabs=timeline&width=400&height=500&small_header=false&adapt_container_width=true&hide_cover=false&show_facepile=true"
-      width="100%" height="500" style="border:none;overflow:hidden;border-radius:8px" 
+    <div class="fb-wrap"><iframe src="https://www.facebook.com/plugins/page.php?href=https%3A%2F%2Fwww.facebook.com%2FCesmeca%2F&tabs=timeline&width=680&height=600&small_header=false&adapt_container_width=true&hide_cover=false&show_facepile=true"
+      width="100%" height="600" style="border:none;overflow:hidden;border-radius:8px" 
       scrolling="no" frameborder="0" allowfullscreen
       allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share" loading="lazy">
     </iframe>
@@ -392,27 +393,26 @@ function inicio_page_shortcode() {
         ['id' => '9eh0cIzDQx8', 'title' => 'Fronteras en la vida cotidiana'],
         ['id' => 'q4fmKCWPLtM', 'title' => '#8M2024'],
     ];
-    $yt_videos = get_transient('cesmeca_yt_videos');
-    if(false === $yt_videos) {
-        $yt_videos = [];
-        $yt_feed = 'https://www.youtube.com/feeds/videos.xml?channel_id=UCzVGC_C3-tXz5FUJSb30zAA';
-        $yt_xml = @simplexml_load_file($yt_feed);
-        if($yt_xml) {
-            foreach($yt_xml->entry as $entry) {
-                $yt_ns = $entry->children('yt', true);
-                $vid_id = (string)$yt_ns->videoId;
-                $title = (string)$entry->title;
-                if($vid_id !== 'bDchhJxInWA') {
+    // Se lee de un JSON local sincronizado a diario por cron (scripts/sync-youtube-playlists.sh)
+    // vía YouTube Data API v3, ya que el contenedor de WordPress no tiene salida
+    // directa al feed RSS de YouTube (cURL error 6: getaddrinfo).
+    $yt_videos = [];
+    $yt_cache_path = WP_CONTENT_DIR . '/uploads/youtube-cache/canal.json';
+    if(file_exists($yt_cache_path)) {
+        $yt_data = json_decode(file_get_contents($yt_cache_path), true);
+        if(!empty($yt_data['items'])) {
+            foreach($yt_data['items'] as $item) {
+                $vid_id = $item['snippet']['resourceId']['videoId'] ?? '';
+                $title = $item['snippet']['title'] ?? '';
+                if($vid_id && $vid_id !== 'bDchhJxInWA' && stripos($title, 'prueb') === false) {
                     $yt_videos[] = ['id' => $vid_id, 'title' => $title];
                 }
-                if(count($yt_videos) >= 4) break;
+                if(count($yt_videos) >= 6) break;
             }
         }
-        if(!empty($yt_videos)) {
-            set_transient('cesmeca_yt_videos', $yt_videos, 6 * HOUR_IN_SECONDS);
-        } else {
-            $yt_videos = $yt_fallback;
-        }
+    }
+    if(empty($yt_videos)) {
+        $yt_videos = $yt_fallback;
     }
     ?>
     <div style="position:relative">

@@ -43,6 +43,7 @@ declare -A PLAYLISTS=(
   [semhist]="PLUHF2q-bWzXlZgQ8WaBUwP8ncPcRnStoJ" # Seminario Historia de Chiapas
   [laud]="PLUHF2q-bWzXl2vPOKfHcDnBLOTRFHhgGG"   # LAUD
   [marti]="PLUHF2q-bWzXkRW1hy5lKU8vIAeYIEeIei"  # Cátedra José Martí
+  [canal]="UUzVGC_C3-tXz5FUJSb30zAA"                # Canal general CESMECA-UNICACH
 )
 
 FAILED=0
