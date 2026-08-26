@@ -140,7 +140,7 @@ add_shortcode('directorio_tabs', function() {
                         ?>
                         <div class="dir-persona" data-nombre="<?php echo esc_attr(mb_strtolower($persona->post_title)); ?>">
                             <div class="dir-nombre"><?php echo esc_html($persona->post_title); ?></div>
-                            <?php if ($cargo): ?><div><?php echo esc_html($cargo); ?></div><?php endif; ?>
+                            <?php if ($cargo): ?><div><span class="dir-badge"><?php echo esc_html($cargo); ?></span></div><?php endif; ?>
                             <?php if ($email): ?><div>✉ <a href="mailto:<?php echo esc_attr($email); ?>"><?php echo esc_html($email); ?></a></div><?php endif; ?>
                             <?php if ($tel): ?><div><?php echo esc_html($tel); ?></div><?php endif; ?>
                             <?php if ($nota): ?><div><span class="dir-badge"><?php echo esc_html($nota); ?></span></div><?php endif; ?>
@@ -2007,3 +2007,278 @@ function cesmeca_actualizar_contenido_marti_once() {
     wp_die('Contenido de la página 1702 (Martí) actualizado. Logo asignado: ' . (has_post_thumbnail(1702) ? 'SÍ' : 'NO'));
 }
 add_action('admin_init', 'cesmeca_actualizar_contenido_marti_once');
+/* ============================================================
+   CUERPOS ACADÉMICOS - CPT dinámico
+   ============================================================ */
+
+// 1. Custom Post Type
+function ca_registrar_cpt() {
+    register_post_type('cuerpo_academico', array(
+        'labels' => array(
+            'name' => 'Cuerpos Académicos',
+            'singular_name' => 'Cuerpo Académico',
+            'add_new_item' => 'Agregar Cuerpo Académico',
+            'edit_item' => 'Editar Cuerpo Académico',
+            'all_items' => 'Todos los Cuerpos Académicos',
+        ),
+        'public' => true,
+        'show_ui' => true,
+        'show_in_menu' => true,
+        'menu_icon' => 'dashicons-groups',
+        'supports' => array('title', 'page-attributes'),
+        'has_archive' => false,
+        'publicly_queryable' => false,
+        'exclude_from_search' => true,
+        'menu_position' => 20,
+    ));
+}
+add_action('init', 'ca_registrar_cpt');
+
+// 2. Taxonomía de Estado (Consolidado / En Consolidación / En Formación)
+function ca_registrar_taxonomia() {
+    register_taxonomy('ca_estado', 'cuerpo_academico', array(
+        'labels' => array(
+            'name' => 'Estado',
+            'singular_name' => 'Estado',
+        ),
+        'public' => true,
+        'show_ui' => true,
+        'show_admin_column' => true,
+        'hierarchical' => false,
+    ));
+}
+add_action('init', 'ca_registrar_taxonomia');
+
+// Crea los 3 términos por defecto si no existen
+function ca_crear_terminos_default() {
+    $estados = array(
+        'consolidado'      => 'Consolidado',
+        'en-consolidacion' => 'En Consolidación',
+        'en-formacion'     => 'En Formación',
+    );
+    foreach ($estados as $slug => $nombre) {
+        if (!term_exists($slug, 'ca_estado')) {
+            wp_insert_term($nombre, 'ca_estado', array('slug' => $slug));
+        }
+    }
+}
+add_action('init', 'ca_crear_terminos_default', 20);
+
+// 3. Metabox de Integrantes: repeater simple (nombre + enlace opcional)
+function ca_agregar_metabox() {
+    add_meta_box(
+        'ca_integrantes_box',
+        'Integrantes',
+        'ca_render_metabox',
+        'cuerpo_academico',
+        'normal',
+        'high'
+    );
+}
+add_action('add_meta_boxes', 'ca_agregar_metabox');
+
+function ca_render_metabox($post) {
+    wp_nonce_field('ca_guardar_integrantes', 'ca_integrantes_nonce');
+    $integrantes = get_post_meta($post->ID, '_ca_integrantes_data', true);
+    if (!is_array($integrantes)) {
+        $integrantes = array();
+    }
+    // Siempre dejar al menos 3 filas vacías disponibles para capturar
+    while (count($integrantes) < 3) {
+        $integrantes[] = array('nombre' => '', 'enlace' => '');
+    }
+    ?>
+    <p>Nombre del integrante y, opcionalmente, el enlace a su ficha (ej. https://cesmeca.mx/maguilar/). Si el enlace se deja vacío, se muestra como texto sin liga.</p>
+    <table class="widefat" id="ca-integrantes-tabla">
+        <thead>
+            <tr>
+                <th style="width:45%;">Nombre</th>
+                <th style="width:45%;">Enlace (opcional)</th>
+                <th style="width:10%;"></th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php foreach ($integrantes as $i => $row) : ?>
+            <tr>
+                <td><input type="text" style="width:100%;" name="ca_integrantes[<?php echo $i; ?>][nombre]" value="<?php echo esc_attr($row['nombre']); ?>" /></td>
+                <td><input type="text" style="width:100%;" name="ca_integrantes[<?php echo $i; ?>][enlace]" value="<?php echo esc_attr($row['enlace']); ?>" placeholder="https://cesmeca.mx/slug/" /></td>
+                <td><button type="button" class="button ca-quitar-fila">Quitar</button></td>
+            </tr>
+            <?php endforeach; ?>
+        </tbody>
+    </table>
+    <p><button type="button" class="button button-secondary" id="ca-agregar-fila">+ Agregar integrante</button></p>
+    <script>
+    (function(){
+        var tabla = document.querySelector('#ca-integrantes-tabla tbody');
+        var addBtn = document.getElementById('ca-agregar-fila');
+        function reindexar(){
+            tabla.querySelectorAll('tr').forEach(function(tr, idx){
+                tr.querySelectorAll('input').forEach(function(input){
+                    input.name = input.name.replace(/\[\d+\]/, '[' + idx + ']');
+                });
+            });
+        }
+        addBtn.addEventListener('click', function(){
+            var idx = tabla.querySelectorAll('tr').length;
+            var tr = document.createElement('tr');
+            tr.innerHTML = '<td><input type="text" style="width:100%;" name="ca_integrantes[' + idx + '][nombre]" value="" /></td>' +
+                            '<td><input type="text" style="width:100%;" name="ca_integrantes[' + idx + '][enlace]" value="" placeholder="https://cesmeca.mx/slug/" /></td>' +
+                            '<td><button type="button" class="button ca-quitar-fila">Quitar</button></td>';
+            tabla.appendChild(tr);
+        });
+        tabla.addEventListener('click', function(e){
+            if (e.target.classList.contains('ca-quitar-fila')) {
+                e.target.closest('tr').remove();
+                reindexar();
+            }
+        });
+    })();
+    </script>
+    <?php
+}
+
+function ca_guardar_metabox($post_id) {
+    if (!isset($_POST['ca_integrantes_nonce']) || !wp_verify_nonce($_POST['ca_integrantes_nonce'], 'ca_guardar_integrantes')) {
+        return;
+    }
+    if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
+        return;
+    }
+    if (isset($_POST['ca_integrantes']) && is_array($_POST['ca_integrantes'])) {
+        $limpio = array();
+        foreach ($_POST['ca_integrantes'] as $row) {
+            $nombre = sanitize_text_field($row['nombre']);
+            $enlace = esc_url_raw(trim($row['enlace']));
+            if (!empty($nombre)) {
+                $limpio[] = array('nombre' => $nombre, 'enlace' => $enlace);
+            }
+        }
+        update_post_meta($post_id, '_ca_integrantes_data', $limpio);
+    }
+}
+add_action('save_post', 'ca_guardar_metabox');
+
+// 4. Shortcode [cuerpos_academicos]
+function ca_shortcode_render() {
+    $query = new WP_Query(array(
+        'post_type' => 'cuerpo_academico',
+        'posts_per_page' => -1,
+        'orderby' => 'menu_order title',
+        'order' => 'ASC',
+    ));
+
+    ob_start();
+    ?>
+    <style>
+    .ca-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+        margin: 20px 0;
+    }
+    .ca-card {
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-left: 4px solid #1a5276;
+        border-radius: 6px;
+        padding: 20px;
+    }
+    .ca-card h3 {
+        color: #1a5276;
+        font-size: 16px;
+        margin: 0 0 12px 0;
+        line-height: 1.3;
+    }
+    .ca-nivel {
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        color: #fff;
+        background: #1a5276;
+        display: inline-block;
+        padding: 3px 10px;
+        border-radius: 20px;
+        margin-bottom: 12px;
+        letter-spacing: 0.5px;
+    }
+    .ca-nivel.formacion { background: #e67e22; }
+    .ca-nivel.consolidacion { background: #27ae60; }
+    .ca-nivel.consolidacion-proceso { background: #8e44ad; }
+    .ca-integrantes h4 {
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        color: #666;
+        margin: 0 0 8px 0;
+        letter-spacing: 0.5px;
+    }
+    .ca-integrantes ul {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+    .ca-integrantes ul li {
+        font-size: 14px;
+        padding: 4px 0;
+        border-bottom: 1px solid #e9ecef;
+    }
+    .ca-integrantes ul li:last-child { border-bottom: none; }
+    .ca-integrantes ul li a {
+        color: #1a5276;
+        text-decoration: none;
+    }
+    .ca-integrantes ul li a:hover { text-decoration: underline; }
+    .ca-integrantes ul li span { color: #444; }
+    @media (max-width: 640px) {
+        .ca-grid { grid-template-columns: 1fr; }
+    }
+    </style>
+    <div class="ca-grid">
+        <?php if ($query->have_posts()) : while ($query->have_posts()) : $query->the_post(); ?>
+            <?php
+            $terms = get_the_terms(get_the_ID(), 'ca_estado');
+            $estado_slug = '';
+            $estado_nombre = '';
+            if ($terms && !is_wp_error($terms)) {
+                $estado_slug = $terms[0]->slug;
+                $estado_nombre = $terms[0]->name;
+            }
+            $clase_nivel = 'ca-nivel';
+            if ($estado_slug === 'en-formacion') {
+                $clase_nivel .= ' formacion';
+            } elseif ($estado_slug === 'consolidado') {
+                $clase_nivel .= ' consolidacion';
+            } elseif ($estado_slug === 'en-consolidacion') {
+                $clase_nivel .= ' consolidacion-proceso';
+            }
+
+            $integrantes = get_post_meta(get_the_ID(), '_ca_integrantes_data', true);
+            if (!is_array($integrantes)) {
+                $integrantes = array();
+            }
+            ?>
+            <div class="ca-card">
+                <h3><?php the_title(); ?></h3>
+                <p><span class="<?php echo esc_attr($clase_nivel); ?>"><?php echo esc_html($estado_nombre); ?></span></p>
+                <div class="ca-integrantes">
+                    <h4>Integrantes</h4>
+                    <ul>
+                        <?php foreach ($integrantes as $row) : ?>
+                            <li>
+                                <?php if (!empty($row['enlace'])) : ?>
+                                    <a href="<?php echo esc_url($row['enlace']); ?>"><?php echo esc_html($row['nombre']); ?></a>
+                                <?php else : ?>
+                                    <span><?php echo esc_html($row['nombre']); ?></span>
+                                <?php endif; ?>
+                            </li>
+                        <?php endforeach; ?>
+                    </ul>
+                </div>
+            </div>
+        <?php endwhile; wp_reset_postdata(); endif; ?>
+    </div>
+    <?php
+    return ob_get_clean();
+}
+add_shortcode('cuerpos_academicos', 'ca_shortcode_render');
