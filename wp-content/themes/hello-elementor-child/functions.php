@@ -2282,3 +2282,456 @@ function ca_shortcode_render() {
     return ob_get_clean();
 }
 add_shortcode('cuerpos_academicos', 'ca_shortcode_render');
+/* ============================================================
+   LÍNEAS DE INVESTIGACIÓN - CPT dinámico
+   ============================================================ */
+
+// 1. Custom Post Type
+function li_registrar_cpt() {
+    register_post_type('linea_investigacion', array(
+        'labels' => array(
+            'name' => 'Líneas de Investigación',
+            'singular_name' => 'Línea de Investigación',
+            'add_new_item' => 'Agregar Línea de Investigación',
+            'edit_item' => 'Editar Línea de Investigación',
+            'all_items' => 'Todas las Líneas de Investigación',
+        ),
+        'public' => true,
+        'show_ui' => true,
+        'show_in_menu' => true,
+        'menu_icon' => 'dashicons-analytics',
+        'supports' => array('title', 'editor', 'page-attributes'),
+        'has_archive' => false,
+        'publicly_queryable' => false,
+        'exclude_from_search' => true,
+        'menu_position' => 21,
+    ));
+}
+add_action('init', 'li_registrar_cpt');
+
+// 2. Metabox de Integrantes: repeater simple (nombre + enlace opcional)
+function li_agregar_metabox() {
+    add_meta_box(
+        'li_integrantes_box',
+        'Integrantes',
+        'li_render_metabox',
+        'linea_investigacion',
+        'normal',
+        'high'
+    );
+}
+add_action('add_meta_boxes', 'li_agregar_metabox');
+
+function li_render_metabox($post) {
+    wp_nonce_field('li_guardar_integrantes', 'li_integrantes_nonce');
+    $integrantes = get_post_meta($post->ID, '_li_integrantes_data', true);
+    if (!is_array($integrantes)) {
+        $integrantes = array();
+    }
+    while (count($integrantes) < 3) {
+        $integrantes[] = array('nombre' => '', 'enlace' => '');
+    }
+    ?>
+    <p>Nombre del integrante y, opcionalmente, el enlace a su ficha (ej. https://cesmeca.mx/maguilar/). Si el enlace se deja vacío, se muestra como texto sin liga.</p>
+    <table class="widefat" id="li-integrantes-tabla">
+        <thead>
+            <tr>
+                <th style="width:45%;">Nombre</th>
+                <th style="width:45%;">Enlace (opcional)</th>
+                <th style="width:10%;"></th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php foreach ($integrantes as $i => $row) : ?>
+            <tr>
+                <td><input type="text" style="width:100%;" name="li_integrantes[<?php echo $i; ?>][nombre]" value="<?php echo esc_attr($row['nombre']); ?>" /></td>
+                <td><input type="text" style="width:100%;" name="li_integrantes[<?php echo $i; ?>][enlace]" value="<?php echo esc_attr($row['enlace']); ?>" placeholder="https://cesmeca.mx/slug/" /></td>
+                <td><button type="button" class="button li-quitar-fila">Quitar</button></td>
+            </tr>
+            <?php endforeach; ?>
+        </tbody>
+    </table>
+    <p><button type="button" class="button button-secondary" id="li-agregar-fila">+ Agregar integrante</button></p>
+    <script>
+    (function(){
+        var tabla = document.querySelector('#li-integrantes-tabla tbody');
+        var addBtn = document.getElementById('li-agregar-fila');
+        function reindexar(){
+            tabla.querySelectorAll('tr').forEach(function(tr, idx){
+                tr.querySelectorAll('input').forEach(function(input){
+                    input.name = input.name.replace(/\[\d+\]/, '[' + idx + ']');
+                });
+            });
+        }
+        addBtn.addEventListener('click', function(){
+            var idx = tabla.querySelectorAll('tr').length;
+            var tr = document.createElement('tr');
+            tr.innerHTML = '<td><input type="text" style="width:100%;" name="li_integrantes[' + idx + '][nombre]" value="" /></td>' +
+                            '<td><input type="text" style="width:100%;" name="li_integrantes[' + idx + '][enlace]" value="" placeholder="https://cesmeca.mx/slug/" /></td>' +
+                            '<td><button type="button" class="button li-quitar-fila">Quitar</button></td>';
+            tabla.appendChild(tr);
+        });
+        tabla.addEventListener('click', function(e){
+            if (e.target.classList.contains('li-quitar-fila')) {
+                e.target.closest('tr').remove();
+                reindexar();
+            }
+        });
+    })();
+    </script>
+    <?php
+}
+
+function li_guardar_metabox($post_id) {
+    if (!isset($_POST['li_integrantes_nonce']) || !wp_verify_nonce($_POST['li_integrantes_nonce'], 'li_guardar_integrantes')) {
+        return;
+    }
+    if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
+        return;
+    }
+    if (isset($_POST['li_integrantes']) && is_array($_POST['li_integrantes'])) {
+        $limpio = array();
+        foreach ($_POST['li_integrantes'] as $row) {
+            $nombre = sanitize_text_field($row['nombre']);
+            $enlace = esc_url_raw(trim($row['enlace']));
+            if (!empty($nombre)) {
+                $limpio[] = array('nombre' => $nombre, 'enlace' => $enlace);
+            }
+        }
+        update_post_meta($post_id, '_li_integrantes_data', $limpio);
+    }
+}
+add_action('save_post', 'li_guardar_metabox');
+
+// 3. Shortcode [lineas_investigacion]
+function li_shortcode_render() {
+    $query = new WP_Query(array(
+        'post_type' => 'linea_investigacion',
+        'posts_per_page' => -1,
+        'orderby' => 'menu_order title',
+        'order' => 'ASC',
+    ));
+
+    ob_start();
+    ?>
+    <style>
+    .li-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+        margin: 20px 0;
+    }
+    .li-card {
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-left: 4px solid #1a5276;
+        border-radius: 6px;
+        padding: 20px;
+    }
+    .li-card h3 {
+        color: #1a5276;
+        font-size: 16px;
+        margin: 0 0 12px 0;
+        line-height: 1.3;
+    }
+    .li-card p {
+        font-size: 13px;
+        color: #555;
+        line-height: 1.6;
+        margin-bottom: 12px;
+    }
+    .li-integrantes h4 {
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        color: #666;
+        margin: 12px 0 8px 0;
+        letter-spacing: 0.5px;
+        border-top: 1px solid #dee2e6;
+        padding-top: 12px;
+    }
+    .li-integrantes ul {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+    .li-integrantes ul li {
+        font-size: 13px;
+        padding: 3px 0;
+        border-bottom: 1px solid #e9ecef;
+    }
+    .li-integrantes ul li:last-child { border-bottom: none; }
+    .li-integrantes ul li a {
+        color: #1a5276;
+        text-decoration: none;
+    }
+    .li-integrantes ul li a:hover { text-decoration: underline; }
+    .li-integrantes ul li span { color: #444; }
+    @media (max-width: 640px) {
+        .li-grid { grid-template-columns: 1fr; }
+    }
+    </style>
+    <div class="li-grid">
+        <?php if ($query->have_posts()) : while ($query->have_posts()) : $query->the_post(); ?>
+            <?php
+            $integrantes = get_post_meta(get_the_ID(), '_li_integrantes_data', true);
+            if (!is_array($integrantes)) {
+                $integrantes = array();
+            }
+            ?>
+            <div class="li-card">
+                <h3><?php the_title(); ?></h3>
+                <p><?php echo wp_kses_post(get_the_content()); ?></p>
+                <div class="li-integrantes">
+                    <h4>Integrantes</h4>
+                    <ul>
+                        <?php foreach ($integrantes as $row) : ?>
+                            <li>
+                                <?php if (!empty($row['enlace'])) : ?>
+                                    <a href="<?php echo esc_url($row['enlace']); ?>"><?php echo esc_html($row['nombre']); ?></a>
+                                <?php else : ?>
+                                    <span><?php echo esc_html($row['nombre']); ?></span>
+                                <?php endif; ?>
+                            </li>
+                        <?php endforeach; ?>
+                    </ul>
+                </div>
+            </div>
+        <?php endwhile; wp_reset_postdata(); endif; ?>
+    </div>
+    <?php
+    return ob_get_clean();
+}
+add_shortcode('lineas_investigacion', 'li_shortcode_render');
+/* ============================================================
+   PROYECTOS DE INVESTIGACIÓN - CPT dinámico
+   ============================================================ */
+
+// 1. Custom Post Type (cada post = una línea/sección del acordeón)
+/* ============================================================
+   PROYECTOS DE INVESTIGACIÓN - CPT dinámico
+   ============================================================ */
+
+// 1. Custom Post Type (cada post = una línea/sección del acordeón)
+function pi_registrar_cpt() {
+    register_post_type('pi_proyecto', array(
+        'labels' => array(
+            'name' => 'Proyectos de Investigación',
+            'singular_name' => 'Línea de Proyectos',
+            'add_new_item' => 'Agregar Línea de Proyectos',
+            'edit_item' => 'Editar Línea de Proyectos',
+            'all_items' => 'Todas las Líneas de Proyectos',
+        ),
+        'public' => true,
+        'show_ui' => true,
+        'show_in_menu' => true,
+        'menu_icon' => 'dashicons-portfolio',
+        'supports' => array('title', 'page-attributes'),
+        'has_archive' => false,
+        'publicly_queryable' => false,
+        'exclude_from_search' => true,
+        'menu_position' => 22,
+    ));
+}
+add_action('init', 'pi_registrar_cpt');
+
+// 2. Metabox: repeater de investigador + proyecto(s)
+function pi_agregar_metabox() {
+    add_meta_box(
+        'pi_investigadores_box',
+        'Investigadores y Proyectos',
+        'pi_render_metabox',
+        'pi_proyecto',
+        'normal',
+        'high'
+    );
+}
+add_action('add_meta_boxes', 'pi_agregar_metabox');
+
+function pi_render_metabox($post) {
+    wp_nonce_field('pi_guardar_investigadores', 'pi_investigadores_nonce');
+    $filas = get_post_meta($post->ID, '_pi_investigadores_data', true);
+    if (!is_array($filas)) {
+        $filas = array();
+    }
+    while (count($filas) < 2) {
+        $filas[] = array('nombre' => '', 'enlace' => '', 'proyectos' => '');
+    }
+    ?>
+    <p>Un investigador por bloque. En "Proyectos" escribe uno por línea (se mostrarán separados igual que en la tabla original). El enlace es opcional.</p>
+    <div id="pi-tabla-wrap">
+        <?php foreach ($filas as $i => $row) : ?>
+        <div class="pi-fila" style="border:1px solid #ddd;padding:12px;margin-bottom:10px;background:#fafafa;">
+            <p>
+                <label><strong>Nombre del investigador/a</strong></label><br>
+                <input type="text" style="width:60%;" name="pi_investigadores[<?php echo $i; ?>][nombre]" value="<?php echo esc_attr($row['nombre']); ?>" />
+                <input type="text" style="width:35%;" name="pi_investigadores[<?php echo $i; ?>][enlace]" value="<?php echo esc_attr($row['enlace']); ?>" placeholder="https://cesmeca.mx/slug/ (opcional)" />
+            </p>
+            <p>
+                <label><strong>Proyectos</strong> (uno por línea)</label><br>
+                <textarea style="width:100%;height:80px;" name="pi_investigadores[<?php echo $i; ?>][proyectos]"><?php echo esc_textarea($row['proyectos']); ?></textarea>
+            </p>
+            <button type="button" class="button pi-quitar-fila">Quitar investigador</button>
+        </div>
+        <?php endforeach; ?>
+    </div>
+    <p><button type="button" class="button button-secondary" id="pi-agregar-fila">+ Agregar investigador</button></p>
+    <script>
+    (function(){
+        var wrap = document.getElementById('pi-tabla-wrap');
+        var addBtn = document.getElementById('pi-agregar-fila');
+        function reindexar(){
+            wrap.querySelectorAll('.pi-fila').forEach(function(fila, idx){
+                fila.querySelectorAll('input, textarea').forEach(function(input){
+                    input.name = input.name.replace(/\[\d+\]/, '[' + idx + ']');
+                });
+            });
+        }
+        addBtn.addEventListener('click', function(){
+            var idx = wrap.querySelectorAll('.pi-fila').length;
+            var div = document.createElement('div');
+            div.className = 'pi-fila';
+            div.style.cssText = 'border:1px solid #ddd;padding:12px;margin-bottom:10px;background:#fafafa;';
+            div.innerHTML = '<p><label><strong>Nombre del investigador/a</strong></label><br>' +
+                '<input type="text" style="width:60%;" name="pi_investigadores[' + idx + '][nombre]" value="" />' +
+                '<input type="text" style="width:35%;" name="pi_investigadores[' + idx + '][enlace]" value="" placeholder="https://cesmeca.mx/slug/ (opcional)" /></p>' +
+                '<p><label><strong>Proyectos</strong> (uno por línea)</label><br>' +
+                '<textarea style="width:100%;height:80px;" name="pi_investigadores[' + idx + '][proyectos]"></textarea></p>' +
+                '<button type="button" class="button pi-quitar-fila">Quitar investigador</button>';
+            wrap.appendChild(div);
+        });
+        wrap.addEventListener('click', function(e){
+            if (e.target.classList.contains('pi-quitar-fila')) {
+                e.target.closest('.pi-fila').remove();
+                reindexar();
+            }
+        });
+    })();
+    </script>
+    <?php
+}
+
+function pi_guardar_metabox($post_id) {
+    if (!isset($_POST['pi_investigadores_nonce']) || !wp_verify_nonce($_POST['pi_investigadores_nonce'], 'pi_guardar_investigadores')) {
+        return;
+    }
+    if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
+        return;
+    }
+    if (isset($_POST['pi_investigadores']) && is_array($_POST['pi_investigadores'])) {
+        $limpio = array();
+        foreach ($_POST['pi_investigadores'] as $row) {
+            $nombre = sanitize_text_field($row['nombre']);
+            $enlace = esc_url_raw(trim($row['enlace']));
+            $proyectos = sanitize_textarea_field($row['proyectos']);
+            if (!empty($nombre)) {
+                $limpio[] = array('nombre' => $nombre, 'enlace' => $enlace, 'proyectos' => $proyectos);
+            }
+        }
+        update_post_meta($post_id, '_pi_investigadores_data', $limpio);
+    }
+}
+add_action('save_post', 'pi_guardar_metabox');
+
+// 3. Shortcode [proyectos_investigacion]
+function pi_shortcode_render() {
+    $query = new WP_Query(array(
+        'post_type' => 'pi_proyecto',
+        'posts_per_page' => -1,
+        'orderby' => 'menu_order title',
+        'order' => 'ASC',
+    ));
+
+    ob_start();
+    ?>
+    <style>
+    .proy-seccion {
+        margin-bottom: 15px;
+        border: 1px solid #dee2e6;
+        border-radius: 6px;
+        overflow: hidden;
+    }
+    .proy-header {
+        background: #f0f4f8;
+        padding: 15px 20px;
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        color: #1a5276;
+        font-weight: 600;
+        font-size: 15px;
+        user-select: none;
+    }
+    .proy-header:hover { background: #e2eaf3; }
+    .proy-header .arrow { transition: transform 0.3s; font-size: 12px; }
+    .proy-header.open .arrow { transform: rotate(90deg); }
+    .proy-body { display: none; padding: 0; }
+    .proy-body.open { display: block; }
+    .proy-table { width: 100%; border-collapse: collapse; }
+    .proy-table th {
+        background: #f8f9fa;
+        padding: 12px 15px;
+        text-align: left;
+        font-size: 13px;
+        color: #555;
+        border-bottom: 1px solid #dee2e6;
+        font-weight: 700;
+    }
+    .proy-table td {
+        padding: 14px 15px;
+        border-bottom: 1px solid #f0f0f0;
+        font-size: 13px;
+        color: #444;
+        vertical-align: top;
+    }
+    .proy-table td:first-child { width: 25%; color: #666; }
+    .proy-table tr:last-child td { border-bottom: none; }
+    .proy-table td a { color: #1a5276; text-decoration: none; }
+    .proy-table td a:hover { text-decoration: underline; }
+    .proy-nota { padding: 15px 20px; font-size: 12px; color: #888; font-style: italic; }
+    </style>
+    <?php if ($query->have_posts()) : while ($query->have_posts()) : $query->the_post(); ?>
+        <?php
+        $filas = get_post_meta(get_the_ID(), '_pi_investigadores_data', true);
+        if (!is_array($filas)) { $filas = array(); }
+        ?>
+        <div class="proy-seccion">
+            <div class="proy-header" onclick="toggleProy(this)">
+                Línea: <?php the_title(); ?> <span class="arrow">›</span>
+            </div>
+            <div class="proy-body">
+                <table class="proy-table">
+                    <tbody>
+                        <tr><th>Investigador/a</th><th>Proyecto</th></tr>
+                        <?php foreach ($filas as $row) :
+                            $proyectos_html = nl2br(esc_html($row['proyectos']));
+                        ?>
+                        <tr>
+                            <td>
+                                <?php if (!empty($row['enlace'])) : ?>
+                                    <a href="<?php echo esc_url($row['enlace']); ?>"><?php echo esc_html($row['nombre']); ?></a>
+                                <?php else : ?>
+                                    <?php echo esc_html($row['nombre']); ?>
+                                <?php endif; ?>
+                            </td>
+                            <td><?php echo $proyectos_html; ?></td>
+                        </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    <?php endwhile; wp_reset_postdata(); endif; ?>
+    <p class="proy-nota">* Los proyectos de investigación se encuentran en actualización</p>
+    <script>
+    function toggleProy(header) {
+        const body = header.nextElementSibling;
+        header.classList.toggle('open');
+        body.classList.toggle('open');
+    }
+    </script>
+    <?php
+    return ob_get_clean();
+}
+add_shortcode('proyectos_investigacion', 'pi_shortcode_render');
