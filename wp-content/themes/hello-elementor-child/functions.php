@@ -2826,3 +2826,356 @@ function inv_guardar_metabox($post_id) {
     }
 }
 add_action('save_post', 'inv_guardar_metabox');
+/* ============================================================
+   LABORATORIA - Metabox editable (alimenta el shortcode
+   [laboratoria_page] que ya usa cesmeca_render_gallery_tabs)
+   ============================================================ */
+
+function lab_es_pagina_laboratoria($post_id) {
+    return ($post_id == 1697);
+}
+
+function lab_agregar_metabox() {
+    add_meta_box(
+        'lab_datos_box',
+        'Datos de Laboratoria',
+        'lab_render_metabox',
+        'page',
+        'normal',
+        'high'
+    );
+}
+add_action('add_meta_boxes', 'lab_agregar_metabox');
+
+function lab_render_metabox($post) {
+    if (!lab_es_pagina_laboratoria($post->ID)) {
+        return;
+    }
+    wp_nonce_field('lab_guardar_datos', 'lab_datos_nonce');
+
+    $intro = get_post_meta($post->ID, '_lab_intro', true);
+    $coordinadora = get_post_meta($post->ID, '_lab_coordinadora', true);
+    $colaboradora = get_post_meta($post->ID, '_lab_colaboradora', true);
+    $imagen_principal = get_post_meta($post->ID, '_lab_imagen_principal', true);
+
+    $actividades = get_post_meta($post->ID, '_lab_actividades_data', true);
+    if (!is_array($actividades)) {
+        $actividades = array();
+    }
+    while (count($actividades) < 4) {
+        $actividades[] = array('etiqueta' => '', 'texto' => '', 'imagenes' => '');
+    }
+    ?>
+    <p><label><strong>Introducción</strong> (un párrafo por línea)</label><br>
+    <textarea style="width:100%;height:100px;" name="lab_intro"><?php echo esc_textarea($intro); ?></textarea></p>
+
+    <p><label><strong>Imagen principal</strong> (URL)</label><br>
+    <input type="text" style="width:100%;" name="lab_imagen_principal" value="<?php echo esc_attr($imagen_principal); ?>" placeholder="/wp-content/uploads/..." /></p>
+
+    <p style="width:48%;display:inline-block;"><label><strong>Coordinadora</strong></label><br>
+    <input type="text" style="width:100%;" name="lab_coordinadora" value="<?php echo esc_attr($coordinadora); ?>" /></p>
+
+    <p style="width:48%;display:inline-block;margin-left:2%;"><label><strong>Colaboradora</strong></label><br>
+    <input type="text" style="width:100%;" name="lab_colaboradora" value="<?php echo esc_attr($colaboradora); ?>" /></p>
+
+    <hr>
+    <p><strong>Actividades (pestañas)</strong></p>
+    <div id="lab-actividades-wrap">
+        <?php foreach ($actividades as $i => $act) : ?>
+        <div class="lab-fila" style="border:1px solid #ddd;padding:12px;margin-bottom:10px;background:#fafafa;">
+            <p><label><strong>Etiqueta de la pestaña</strong> (ej. Actividad 1)</label><br>
+            <input type="text" style="width:100%;" name="lab_actividades[<?php echo $i; ?>][etiqueta]" value="<?php echo esc_attr($act['etiqueta']); ?>" /></p>
+            <p><label><strong>Texto</strong> (puedes usar &lt;strong&gt;, &lt;em&gt;, &lt;br&gt;)</label><br>
+            <textarea style="width:100%;height:100px;" name="lab_actividades[<?php echo $i; ?>][texto]"><?php echo esc_textarea($act['texto']); ?></textarea></p>
+            <p><label><strong>Imágenes</strong> (una URL por línea)</label><br>
+            <textarea style="width:100%;height:60px;" name="lab_actividades[<?php echo $i; ?>][imagenes]"><?php echo esc_textarea($act['imagenes']); ?></textarea></p>
+            <button type="button" class="button lab-quitar-fila">Quitar actividad</button>
+        </div>
+        <?php endforeach; ?>
+    </div>
+    <p><button type="button" class="button button-secondary" id="lab-agregar-fila">+ Agregar actividad</button></p>
+    <script>
+    (function(){
+        var wrap = document.getElementById('lab-actividades-wrap');
+        var addBtn = document.getElementById('lab-agregar-fila');
+        function reindexar(){
+            wrap.querySelectorAll('.lab-fila').forEach(function(fila, idx){
+                fila.querySelectorAll('input, textarea').forEach(function(input){
+                    input.name = input.name.replace(/\[\d+\]/, '[' + idx + ']');
+                });
+            });
+        }
+        addBtn.addEventListener('click', function(){
+            var idx = wrap.querySelectorAll('.lab-fila').length;
+            var div = document.createElement('div');
+            div.className = 'lab-fila';
+            div.style.cssText = 'border:1px solid #ddd;padding:12px;margin-bottom:10px;background:#fafafa;';
+            div.innerHTML = '<p><label><strong>Etiqueta de la pestaña</strong> (ej. Actividad 1)</label><br>' +
+                '<input type="text" style="width:100%;" name="lab_actividades[' + idx + '][etiqueta]" value="" /></p>' +
+                '<p><label><strong>Texto</strong></label><br>' +
+                '<textarea style="width:100%;height:100px;" name="lab_actividades[' + idx + '][texto]"></textarea></p>' +
+                '<p><label><strong>Imágenes</strong> (una URL por línea)</label><br>' +
+                '<textarea style="width:100%;height:60px;" name="lab_actividades[' + idx + '][imagenes]"></textarea></p>' +
+                '<button type="button" class="button lab-quitar-fila">Quitar actividad</button>';
+            wrap.appendChild(div);
+        });
+        wrap.addEventListener('click', function(e){
+            if (e.target.classList.contains('lab-quitar-fila')) {
+                e.target.closest('.lab-fila').remove();
+                reindexar();
+            }
+        });
+    })();
+    </script>
+    <?php
+}
+
+function lab_guardar_metabox($post_id) {
+    if (!isset($_POST['lab_datos_nonce']) || !wp_verify_nonce($_POST['lab_datos_nonce'], 'lab_guardar_datos')) {
+        return;
+    }
+    if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
+        return;
+    }
+    if (!lab_es_pagina_laboratoria($post_id)) {
+        return;
+    }
+
+    if (isset($_POST['lab_intro'])) {
+        update_post_meta($post_id, '_lab_intro', wp_kses_post($_POST['lab_intro']));
+    }
+    if (isset($_POST['lab_coordinadora'])) {
+        update_post_meta($post_id, '_lab_coordinadora', sanitize_text_field($_POST['lab_coordinadora']));
+    }
+    if (isset($_POST['lab_colaboradora'])) {
+        update_post_meta($post_id, '_lab_colaboradora', sanitize_text_field($_POST['lab_colaboradora']));
+    }
+    if (isset($_POST['lab_imagen_principal'])) {
+        update_post_meta($post_id, '_lab_imagen_principal', sanitize_text_field($_POST['lab_imagen_principal']));
+    }
+    if (isset($_POST['lab_actividades']) && is_array($_POST['lab_actividades'])) {
+        $limpio = array();
+        foreach ($_POST['lab_actividades'] as $act) {
+            $etiqueta = sanitize_text_field($act['etiqueta']);
+            $texto = wp_kses_post($act['texto']);
+            $imagenes = sanitize_textarea_field($act['imagenes']);
+            if (!empty($etiqueta)) {
+                $limpio[] = array('etiqueta' => $etiqueta, 'texto' => $texto, 'imagenes' => $imagenes);
+            }
+        }
+        update_post_meta($post_id, '_lab_actividades_data', $limpio);
+    }
+}
+add_action('save_post', 'lab_guardar_metabox');
+
+// Reemplaza el shortcode [laboratoria_page] para leer desde los meta campos
+function laboratoria_page_shortcode_v2() {
+    $post_id = 1697;
+    $intro = get_post_meta($post_id, '_lab_intro', true);
+    $coordinadora = get_post_meta($post_id, '_lab_coordinadora', true);
+    $colaboradora = get_post_meta($post_id, '_lab_colaboradora', true);
+    $imagen_principal = get_post_meta($post_id, '_lab_imagen_principal', true);
+    $actividades = get_post_meta($post_id, '_lab_actividades_data', true);
+    if (!is_array($actividades)) { $actividades = array(); }
+
+    ob_start();
+    $parrafos = preg_split('/\n+/', trim($intro));
+    foreach ($parrafos as $p) {
+        $p = trim($p);
+        if ($p === '') continue;
+        echo '<p>' . wp_kses_post($p) . '</p>';
+    }
+    if (!empty($coordinadora)) {
+        echo '<h3>Coordinadora</h3><p>' . esc_html($coordinadora) . '</p>';
+    }
+    if (!empty($colaboradora)) {
+        echo '<h3>Colaboradora</h3><p>' . esc_html($colaboradora) . '</p>';
+    }
+    $intro_html = '<div class="lab-intro-text">' . ob_get_clean() . '</div>';
+    if (!empty($imagen_principal)) {
+        $intro_html .= '<div class="lab-intro-img"><img src="' . esc_url($imagen_principal) . '" alt="Laboratoria Creación e Incidencia Feminista"></div>';
+    }
+
+    $tabs = array();
+    foreach ($actividades as $act) {
+        ob_start();
+        echo wp_kses_post(nl2br($act['texto']));
+        if (!empty($act['imagenes'])) {
+            $urls = preg_split('/\n+/', trim($act['imagenes']));
+            foreach ($urls as $url) {
+                $url = trim($url);
+                if ($url === '') continue;
+                echo '<img src="' . esc_url($url) . '" alt="' . esc_attr($act['etiqueta']) . '">';
+            }
+        }
+        $tab_html = ob_get_clean();
+        $tabs[] = array('label' => $act['etiqueta'], 'type' => 'content', 'html' => $tab_html);
+    }
+
+    return cesmeca_render_gallery_tabs([
+        'prefix' => 'lab',
+        'intro_html' => $intro_html,
+        'tabs' => $tabs,
+    ]);
+}
+remove_shortcode('laboratoria_page');
+add_shortcode('laboratoria_page', 'laboratoria_page_shortcode_v2');
+/* ============================================================
+   LABORATORIA - Pestañas automáticas desde bloques Gutenberg
+   Divide el contenido de la página 1697 en pestañas usando
+   los encabezados <h4>Actividad N</h4> como marcadores.
+   El contenido se edita 100% en bloques normales (como LACEM/LAUD).
+   ============================================================ */
+
+function lab_filtrar_contenido_tabs($content) {
+    if (!is_page(1697) || is_admin()) {
+        return $content;
+    }
+
+    $marcador = '<h3>Actividades</h3>';
+    $pos = strpos($content, $marcador);
+    if ($pos === false) {
+        return $content;
+    }
+
+    $intro_html = substr($content, 0, $pos);
+    $resto = substr($content, $pos + strlen($marcador));
+
+    if (!preg_match_all('/<h4[^>]*>(.*?)<\/h4>(.*?)(?=(<h4|$))/s', $resto, $matches, PREG_SET_ORDER)) {
+        return $content;
+    }
+
+    $tabs = array();
+    foreach ($matches as $m) {
+        $label = trim(wp_strip_all_tags($m[1]));
+        $tab_content = trim($m[2]);
+        if ($label === '') continue;
+        $tabs[] = array('label' => $label, 'type' => 'content', 'html' => $tab_content);
+    }
+
+    if (empty($tabs)) {
+        return $content;
+    }
+
+    return $intro_html . cesmeca_render_gallery_tabs([
+        'prefix' => 'lab',
+        'intro_html' => '',
+        'tabs' => $tabs,
+    ]);
+}
+add_filter('the_content', 'lab_filtrar_contenido_tabs', 20);
+/* ============================================================
+   CONVENIOS - CPT dinámico
+   ============================================================ */
+
+function conv_registrar_cpt() {
+    register_post_type('convenio', array(
+        'labels' => array(
+            'name' => 'Convenios',
+            'singular_name' => 'Convenio',
+            'add_new_item' => 'Agregar Convenio',
+            'edit_item' => 'Editar Convenio',
+            'all_items' => 'Todos los Convenios',
+        ),
+        'public' => true,
+        'show_ui' => true,
+        'show_in_menu' => true,
+        'menu_icon' => 'dashicons-media-document',
+        'supports' => array('title', 'thumbnail', 'page-attributes'),
+        'has_archive' => false,
+        'publicly_queryable' => false,
+        'exclude_from_search' => true,
+        'menu_position' => 23,
+    ));
+}
+add_action('init', 'conv_registrar_cpt');
+
+function conv_agregar_metabox() {
+    add_meta_box(
+        'conv_datos_box',
+        'Datos del Convenio',
+        'conv_render_metabox',
+        'convenio',
+        'normal',
+        'high'
+    );
+}
+add_action('add_meta_boxes', 'conv_agregar_metabox');
+
+function conv_render_metabox($post) {
+    wp_nonce_field('conv_guardar_datos', 'conv_datos_nonce');
+    $descripcion = get_post_meta($post->ID, '_conv_descripcion', true);
+    $enlace = get_post_meta($post->ID, '_conv_enlace', true);
+    ?>
+    <p><label><strong>Descripción</strong></label><br>
+    <textarea style="width:100%;height:100px;" name="conv_descripcion"><?php echo esc_textarea($descripcion); ?></textarea></p>
+
+    <p><label><strong>Enlace de "Ver detalles"</strong> (URL completa, opcional)</label><br>
+    <input type="text" style="width:100%;" name="conv_enlace" value="<?php echo esc_attr($enlace); ?>" placeholder="https://cesmeca.mx/..." /></p>
+
+    <p style="color:#888;">Usa "Imagen destacada" (panel derecho) para la imagen de la tarjeta.</p>
+    <?php
+}
+
+function conv_guardar_metabox($post_id) {
+    if (!isset($_POST['conv_datos_nonce']) || !wp_verify_nonce($_POST['conv_datos_nonce'], 'conv_guardar_datos')) {
+        return;
+    }
+    if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
+        return;
+    }
+    if (isset($_POST['conv_descripcion'])) {
+        update_post_meta($post_id, '_conv_descripcion', sanitize_textarea_field($_POST['conv_descripcion']));
+    }
+    if (isset($_POST['conv_enlace'])) {
+        update_post_meta($post_id, '_conv_enlace', esc_url_raw(trim($_POST['conv_enlace'])));
+    }
+}
+add_action('save_post', 'conv_guardar_metabox');
+
+function conv_shortcode_render() {
+    $query = new WP_Query(array(
+        'post_type' => 'convenio',
+        'posts_per_page' => -1,
+        'orderby' => 'menu_order title',
+        'order' => 'ASC',
+    ));
+
+    ob_start();
+    ?>
+    <style>
+    .conv-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:24px;margin-top:8px}
+    .conv-card{background:#fff;border:1px solid #e5e5e5;border-radius:8px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.06);transition:transform .2s,box-shadow .2s;display:flex;flex-direction:column}
+    .conv-card:hover{transform:translateY(-4px);box-shadow:0 6px 20px rgba(0,0,0,.12)}
+    .conv-card img{width:100%;height:180px;object-fit:cover;display:block}
+    .conv-card-body{padding:16px;flex:1;display:flex;flex-direction:column}
+    .conv-card-body h3{font-size:.95rem;font-weight:700;color:#1a1a2e;margin:0 0 10px;line-height:1.4}
+    .conv-card-body p{font-size:.85rem;color:#555;line-height:1.6;flex:1;margin-bottom:14px}
+    .conv-card-body a{display:inline-block;padding:7px 16px;background:#1a6fa8;color:#fff;border-radius:4px;font-size:.85rem;text-decoration:none;transition:background .2s}
+    .conv-card-body a:hover{background:#145a88}
+    @media(max-width:600px){.conv-grid{grid-template-columns:1fr}}
+    </style>
+    <div class="conv-grid">
+        <?php if ($query->have_posts()) : while ($query->have_posts()) : $query->the_post(); ?>
+            <?php
+            $descripcion = get_post_meta(get_the_ID(), '_conv_descripcion', true);
+            $enlace = get_post_meta(get_the_ID(), '_conv_enlace', true);
+            ?>
+            <div class="conv-card">
+                <?php if (has_post_thumbnail()) : ?>
+                    <img src="<?php echo esc_url(get_the_post_thumbnail_url(get_the_ID(), 'medium')); ?>" alt="<?php the_title_attribute(); ?>">
+                <?php endif; ?>
+                <div class="conv-card-body">
+                    <h3><?php the_title(); ?></h3>
+                    <p><?php echo esc_html($descripcion); ?></p>
+                    <?php if (!empty($enlace)) : ?>
+                        <a href="<?php echo esc_url($enlace); ?>">Ver detalles</a>
+                    <?php endif; ?>
+                </div>
+            </div>
+        <?php endwhile; wp_reset_postdata(); endif; ?>
+    </div>
+    <?php
+    return ob_get_clean();
+}
+add_shortcode('convenios_page_v2', 'conv_shortcode_render');
