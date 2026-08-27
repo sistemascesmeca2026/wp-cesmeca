@@ -3179,3 +3179,177 @@ function conv_shortcode_render() {
     return ob_get_clean();
 }
 add_shortcode('convenios_page_v2', 'conv_shortcode_render');
+/* ============================================================
+   POSGRADOS - CPT reutilizable para las 4 páginas
+   (Maestría CSH, Doctorado CSH, Maestría EIF, Doctorado EIF)
+   ============================================================ */
+
+function posg_registrar_cpt() {
+    register_post_type('posgrado_seccion', array(
+        'labels' => array(
+            'name' => 'Secciones de Posgrado',
+            'singular_name' => 'Sección de Posgrado',
+            'add_new_item' => 'Agregar Sección',
+            'edit_item' => 'Editar Sección',
+            'all_items' => 'Todas las Secciones',
+        ),
+        'public' => true,
+        'show_ui' => true,
+        'show_in_menu' => true,
+        'menu_icon' => 'dashicons-welcome-learn-more',
+        'supports' => array('title', 'editor', 'page-attributes'),
+        'has_archive' => false,
+        'publicly_queryable' => false,
+        'exclude_from_search' => true,
+        'menu_position' => 24,
+    ));
+}
+add_action('init', 'posg_registrar_cpt');
+
+function posg_registrar_taxonomia() {
+    register_taxonomy('posgrado_programa', 'posgrado_seccion', array(
+        'labels' => array('name' => 'Programa', 'singular_name' => 'Programa'),
+        'public' => true,
+        'show_ui' => true,
+        'show_admin_column' => true,
+        'hierarchical' => true,
+    ));
+}
+add_action('init', 'posg_registrar_taxonomia');
+
+function posg_crear_terminos_default() {
+    $programas = array(
+        'mcsh' => 'Maestría en Ciencias Sociales y Humanísticas',
+        'dcsh' => 'Doctorado en Ciencias Sociales y Humanísticas',
+        'meif' => 'Maestría en Estudios e Intervención Feministas',
+        'deif' => 'Doctorado en Estudios e Intervención Feministas',
+    );
+    foreach ($programas as $slug => $nombre) {
+        if (!term_exists($slug, 'posgrado_programa')) {
+            wp_insert_term($nombre, 'posgrado_programa', array('slug' => $slug));
+        }
+    }
+}
+add_action('init', 'posg_crear_terminos_default', 20);
+
+// Shortcode [posgrado_tabs programa="mcsh" titulo="Maestría en..." imagen="/ruta/..."]
+function posg_tabs_shortcode($atts) {
+    $atts = shortcode_atts(array(
+        'programa' => '',
+        'titulo' => '',
+        'imagen' => '/wp-content/uploads/cesmeca-legacy/2019/08/22/posgradosss.jpg',
+    ), $atts);
+
+    if (empty($atts['programa'])) {
+        return '<p>Falta especificar el programa.</p>';
+    }
+
+    $query = new WP_Query(array(
+        'post_type' => 'posgrado_seccion',
+        'posts_per_page' => -1,
+        'orderby' => 'menu_order',
+        'order' => 'ASC',
+        'tax_query' => array(
+            array(
+                'taxonomy' => 'posgrado_programa',
+                'field' => 'slug',
+                'terms' => $atts['programa'],
+            ),
+        ),
+    ));
+
+    if (!$query->have_posts()) {
+        return '<p>Aún no hay secciones cargadas para este programa.</p>';
+    }
+
+    $uid = 'posg_' . uniqid();
+    ob_start();
+    ?>
+    <div class="posg-wrap" id="<?php echo esc_attr($uid); ?>">
+      <div class="posg-header">
+        <div class="posg-header-text"><h1 style="margin:0;color:#162959;font-size:2em;font-family:'Lora',serif;letter-spacing:0.01em;"><?php echo esc_html($atts['titulo'] ?: get_the_title()); ?></h1></div>
+        <div class="posg-header-img"><img src="<?php echo esc_url($atts['imagen']); ?>" alt="<?php echo esc_attr($atts['titulo']); ?>"></div>
+      </div>
+      <div class="posg-tabs-wrapper">
+        <div class="posg-tabs-nav">
+          <?php $i = 0; while ($query->have_posts()) : $query->the_post(); ?>
+            <button class="posg-tab-btn<?php echo $i === 0 ? ' active' : ''; ?>" data-tab="<?php echo esc_attr($uid . '_' . $i); ?>"><?php the_title(); ?></button>
+          <?php $i++; endwhile; ?>
+        </div>
+        <?php $query->rewind_posts(); $i = 0; while ($query->have_posts()) : $query->the_post(); ?>
+          <div class="posg-tab-panel<?php echo $i === 0 ? ' active' : ''; ?>" data-panel="<?php echo esc_attr($uid . '_' . $i); ?>">
+            <?php the_content(); ?>
+          </div>
+        <?php $i++; endwhile; wp_reset_postdata(); ?>
+      </div>
+    </div>
+    <style>
+    .posg-wrap{max-width:1200px;margin:0 auto}
+    .posg-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;flex-wrap:wrap;gap:16px}
+    .posg-header-img img{max-height:90px}
+    .posg-tabs-wrapper{display:flex;gap:24px;align-items:flex-start;flex-wrap:wrap}
+    .posg-tabs-nav{display:flex;flex-direction:column;gap:2px;flex:0 0 260px}
+    .posg-tab-btn{text-align:left;padding:12px 16px;background:#f4f6f9;border:none;border-radius:4px;cursor:pointer;font-size:.92rem;font-weight:600;color:#1a1a2e}
+    .posg-tab-btn:hover{background:#e4ecf6}
+    .posg-tab-btn.active{background:#3d7cc9;color:#fff}
+    .posg-tab-panel{display:none;flex:1;min-width:280px;padding:20px 28px 8px 12px;font-size:.95rem;line-height:1.7;text-align:justify;color:#333}
+    .posg-tab-panel.active{display:block}
+    .posg-tab-panel p{margin-bottom:14px}
+    @media(max-width:900px){.posg-tabs-nav{flex:1 1 100%}}
+    </style>
+    <script>
+    (function(){
+      var wrap = document.getElementById('<?php echo esc_js($uid); ?>');
+      wrap.querySelectorAll('.posg-tab-btn').forEach(function(btn){
+        btn.addEventListener('click', function(){
+          wrap.querySelectorAll('.posg-tab-btn').forEach(function(b){b.classList.remove('active')});
+          wrap.querySelectorAll('.posg-tab-panel').forEach(function(p){p.classList.remove('active')});
+          btn.classList.add('active');
+          wrap.querySelector('[data-panel="'+btn.getAttribute('data-tab')+'"]').classList.add('active');
+        });
+      });
+    })();
+    </script>
+    <?php
+    return ob_get_clean();
+}
+add_shortcode('posgrado_tabs', 'posg_tabs_shortcode');
+/* ============================================================
+   POSGRADOS - Filtro por programa en la lista del admin
+   ============================================================ */
+
+function posg_filtro_admin_programa() {
+    global $typenow;
+    if ($typenow !== 'posgrado_seccion') {
+        return;
+    }
+    $seleccionado = isset($_GET['posgrado_programa']) ? $_GET['posgrado_programa'] : '';
+    $terminos = get_terms(array('taxonomy' => 'posgrado_programa', 'hide_empty' => false));
+    if (empty($terminos) || is_wp_error($terminos)) {
+        return;
+    }
+    echo '<select name="posgrado_programa">';
+    echo '<option value="">Todos los programas</option>';
+    foreach ($terminos as $term) {
+        printf(
+            '<option value="%s"%s>%s</option>',
+            esc_attr($term->slug),
+            selected($seleccionado, $term->slug, false),
+            esc_html($term->name)
+        );
+    }
+    echo '</select>';
+}
+add_action('restrict_manage_posts', 'posg_filtro_admin_programa');
+
+// Orden por defecto en el admin: agrupado por programa, luego por orden de pestaña
+function posg_admin_orden_defecto($query) {
+    global $pagenow, $typenow;
+    if (is_admin() && $pagenow === 'edit.php' && $typenow === 'posgrado_seccion' && $query->is_main_query()) {
+        if (empty($_GET['orderby'])) {
+            $query->set('orderby', 'menu_order');
+            $query->set('order', 'ASC');
+        }
+    }
+}
+add_action('pre_get_posts', 'posg_admin_orden_defecto');
