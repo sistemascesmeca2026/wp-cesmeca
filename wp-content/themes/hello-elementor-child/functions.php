@@ -2735,3 +2735,94 @@ function pi_shortcode_render() {
     return ob_get_clean();
 }
 add_shortcode('proyectos_investigacion', 'pi_shortcode_render');
+/* ============================================================
+   INVESTIGADORES - Metabox de edición amigable
+   (la plantilla plantilla-investigador.php ya lee estos campos
+   meta: _inv_perfil, _inv_lineas_investigacion, etc. Este bloque
+   solo mejora la pantalla de edición en el admin.)
+   ============================================================ */
+
+// 1. Detectar si la página usa la plantilla de investigador
+function inv_es_pagina_investigador($post_id) {
+    $template = get_post_meta($post_id, '_wp_page_template', true);
+    return ($template === 'plantilla-investigador.php');
+}
+
+// 2. Ocultar el editor clásico de contenido en páginas de investigador
+function inv_ocultar_editor_contenido() {
+    global $post;
+    if ($post && $post->post_type === 'page' && inv_es_pagina_investigador($post->ID)) {
+        remove_post_type_support('page', 'editor');
+    }
+}
+add_action('admin_init', 'inv_ocultar_editor_contenido');
+
+// 3. Metabox con los 6 campos reales que usa la plantilla
+function inv_agregar_metabox() {
+    add_meta_box(
+        'inv_datos_box',
+        'Datos del Investigador / Investigadora',
+        'inv_render_metabox',
+        'page',
+        'normal',
+        'high'
+    );
+}
+add_action('add_meta_boxes', 'inv_agregar_metabox');
+
+function inv_render_metabox($post) {
+    // Solo mostrar en páginas con la plantilla de investigador
+    if (!inv_es_pagina_investigador($post->ID)) {
+        echo '<p style="color:#888;">Este metabox solo aplica a páginas con la plantilla "Investigador".</p>';
+        return;
+    }
+
+    wp_nonce_field('inv_guardar_datos', 'inv_datos_nonce');
+
+    $campos = array(
+        'perfil' => array('label' => 'Perfil', 'help' => 'Formación académica, grados, distinciones.'),
+        'lineas_investigacion' => array('label' => 'Líneas de investigación', 'help' => 'Una por línea si son varias.'),
+        'proyectos_investigacion' => array('label' => 'Proyectos de investigación', 'help' => 'Uno por línea.'),
+        'publicaciones' => array('label' => 'Algunas publicaciones', 'help' => 'Una por línea (deja una línea en blanco entre referencias si quieres más espacio). Puedes usar <em>texto</em> para cursivas.'),
+        'correo' => array('label' => 'Correo electrónico', 'help' => 'Ej. nombre@unicach.mx'),
+        'cooperacion_interinstitucional' => array('label' => 'Cooperación interinstitucional', 'help' => 'Una por línea. Deja vacío si no aplica.'),
+    );
+
+    foreach ($campos as $key => $c) {
+        $valor = get_post_meta($post->ID, '_inv_' . $key, true);
+        $rows = ($key === 'correo') ? 1 : 5;
+        ?>
+        <p style="margin-bottom:4px;">
+            <label for="inv_<?php echo esc_attr($key); ?>"><strong><?php echo esc_html($c['label']); ?></strong></label><br>
+            <span style="color:#888;font-size:12px;"><?php echo esc_html($c['help']); ?></span>
+        </p>
+        <?php if ($rows === 1) : ?>
+            <input type="text" style="width:100%;margin-bottom:18px;" id="inv_<?php echo esc_attr($key); ?>" name="inv_<?php echo esc_attr($key); ?>" value="<?php echo esc_attr($valor); ?>" />
+        <?php else : ?>
+            <textarea style="width:100%;height:<?php echo $rows * 24; ?>px;margin-bottom:18px;" id="inv_<?php echo esc_attr($key); ?>" name="inv_<?php echo esc_attr($key); ?>"><?php echo esc_textarea($valor); ?></textarea>
+        <?php endif;
+    }
+}
+
+function inv_guardar_metabox($post_id) {
+    if (!isset($_POST['inv_datos_nonce']) || !wp_verify_nonce($_POST['inv_datos_nonce'], 'inv_guardar_datos')) {
+        return;
+    }
+    if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
+        return;
+    }
+    if (!inv_es_pagina_investigador($post_id)) {
+        return;
+    }
+
+    $campos = array('perfil', 'lineas_investigacion', 'proyectos_investigacion', 'publicaciones', 'correo', 'cooperacion_interinstitucional');
+    foreach ($campos as $key) {
+        if (isset($_POST['inv_' . $key])) {
+            $valor = ($key === 'correo')
+                ? sanitize_text_field($_POST['inv_' . $key])
+                : wp_kses_post($_POST['inv_' . $key]);
+            update_post_meta($post_id, '_inv_' . $key, $valor);
+        }
+    }
+}
+add_action('save_post', 'inv_guardar_metabox');
