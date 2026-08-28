@@ -2340,73 +2340,16 @@ add_action('save_post', 'li_guardar_metabox');
 
 // 3. Shortcode [lineas_investigacion]
 function li_shortcode_render() {
+    wp_enqueue_style('cesmeca-shared');
     $query = new WP_Query(array(
         'post_type' => 'linea_investigacion',
         'posts_per_page' => -1,
         'orderby' => 'menu_order title',
         'order' => 'ASC',
     ));
-
     ob_start();
     ?>
-    <style>
-    .li-grid {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 20px;
-        margin: 20px 0;
-    }
-    .li-card {
-        background: #f8f9fa;
-        border: 1px solid #dee2e6;
-        border-left: 4px solid #1a5276;
-        border-radius: 6px;
-        padding: 20px;
-    }
-    .li-card h3 {
-        color: #1a5276;
-        font-size: 16px;
-        margin: 0 0 12px 0;
-        line-height: 1.3;
-    }
-    .li-card p {
-        font-size: 13px;
-        color: #555;
-        line-height: 1.6;
-        margin-bottom: 12px;
-    }
-    .li-integrantes h4 {
-        font-size: 11px;
-        font-weight: 700;
-        text-transform: uppercase;
-        color: #666;
-        margin: 12px 0 8px 0;
-        letter-spacing: 0.5px;
-        border-top: 1px solid #dee2e6;
-        padding-top: 12px;
-    }
-    .li-integrantes ul {
-        margin: 0;
-        padding: 0;
-        list-style: none;
-    }
-    .li-integrantes ul li {
-        font-size: 13px;
-        padding: 3px 0;
-        border-bottom: 1px solid #e9ecef;
-    }
-    .li-integrantes ul li:last-child { border-bottom: none; }
-    .li-integrantes ul li a {
-        color: #1a5276;
-        text-decoration: none;
-    }
-    .li-integrantes ul li a:hover { text-decoration: underline; }
-    .li-integrantes ul li span { color: #444; }
-    @media (max-width: 640px) {
-        .li-grid { grid-template-columns: 1fr; }
-    }
-    </style>
-    <div class="li-grid">
+    <div class="cesmeca-grid">
         <?php if ($query->have_posts()) : while ($query->have_posts()) : $query->the_post(); ?>
             <?php
             $integrantes = get_post_meta(get_the_ID(), '_li_integrantes_data', true);
@@ -2414,10 +2357,10 @@ function li_shortcode_render() {
                 $integrantes = array();
             }
             ?>
-            <div class="li-card">
+            <div class="cesmeca-card">
                 <h3><?php the_title(); ?></h3>
                 <p><?php echo wp_kses_post(get_the_content()); ?></p>
-                <div class="li-integrantes">
+                <div class="cesmeca-integrantes cesmeca-integrantes--separado">
                     <h4>Integrantes</h4>
                     <ul>
                         <?php foreach ($integrantes as $row) : ?>
@@ -2570,73 +2513,26 @@ add_action('save_post', 'pi_guardar_metabox');
 
 // 3. Shortcode [proyectos_investigacion]
 function pi_shortcode_render() {
+    wp_enqueue_style('cesmeca-shared');
     $query = new WP_Query(array(
         'post_type' => 'pi_proyecto',
         'posts_per_page' => -1,
         'orderby' => 'menu_order title',
         'order' => 'ASC',
     ));
-
     ob_start();
     ?>
-    <style>
-    .proy-seccion {
-        margin-bottom: 15px;
-        border: 1px solid #dee2e6;
-        border-radius: 6px;
-        overflow: hidden;
-    }
-    .proy-header {
-        background: #f0f4f8;
-        padding: 15px 20px;
-        cursor: pointer;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        color: #1a5276;
-        font-weight: 600;
-        font-size: 15px;
-        user-select: none;
-    }
-    .proy-header:hover { background: #e2eaf3; }
-    .proy-header .arrow { transition: transform 0.3s; font-size: 12px; }
-    .proy-header.open .arrow { transform: rotate(90deg); }
-    .proy-body { display: none; padding: 0; }
-    .proy-body.open { display: block; }
-    .proy-table { width: 100%; border-collapse: collapse; }
-    .proy-table th {
-        background: #f8f9fa;
-        padding: 12px 15px;
-        text-align: left;
-        font-size: 13px;
-        color: #555;
-        border-bottom: 1px solid #dee2e6;
-        font-weight: 700;
-    }
-    .proy-table td {
-        padding: 14px 15px;
-        border-bottom: 1px solid #f0f0f0;
-        font-size: 13px;
-        color: #444;
-        vertical-align: top;
-    }
-    .proy-table td:first-child { width: 25%; color: #666; }
-    .proy-table tr:last-child td { border-bottom: none; }
-    .proy-table td a { color: #1a5276; text-decoration: none; }
-    .proy-table td a:hover { text-decoration: underline; }
-    .proy-nota { padding: 15px 20px; font-size: 12px; color: #888; font-style: italic; }
-    </style>
     <?php if ($query->have_posts()) : while ($query->have_posts()) : $query->the_post(); ?>
         <?php
         $filas = get_post_meta(get_the_ID(), '_pi_investigadores_data', true);
         if (!is_array($filas)) { $filas = array(); }
         ?>
-        <div class="proy-seccion">
-            <div class="proy-header" onclick="toggleProy(this)">
+        <div class="cesmeca-accordion-seccion">
+            <div class="cesmeca-accordion-header" onclick="cesmecaToggleAccordion(this)">
                 Línea: <?php the_title(); ?> <span class="arrow">›</span>
             </div>
-            <div class="proy-body">
-                <table class="proy-table">
+            <div class="cesmeca-accordion-body">
+                <table class="cesmeca-table">
                     <tbody>
                         <tr><th>Investigador/a</th><th>Proyecto</th></tr>
                         <?php foreach ($filas as $row) :
@@ -2658,9 +2554,9 @@ function pi_shortcode_render() {
             </div>
         </div>
     <?php endwhile; wp_reset_postdata(); endif; ?>
-    <p class="proy-nota">* Los proyectos de investigación se encuentran en actualización</p>
+    <p class="cesmeca-nota">* Los proyectos de investigación se encuentran en actualización</p>
     <script>
-    function toggleProy(header) {
+    function cesmecaToggleAccordion(header) {
         const body = header.nextElementSibling;
         header.classList.toggle('open');
         body.classList.toggle('open');
@@ -2940,7 +2836,7 @@ function laboratoria_page_shortcode_v2() {
             foreach ($urls as $url) {
                 $url = trim($url);
                 if ($url === '') continue;
-                echo '<img src="' . esc_url($url) . '" alt="' . esc_attr($act['etiqueta']) . '">';
+                echo '<img class="cesmeca-zoom" src="' . esc_url($url) . '" alt="' . esc_attr($act['etiqueta']) . '">';
             }
         }
         $tab_html = ob_get_clean();
@@ -3041,12 +2937,15 @@ function conv_render_metabox($post) {
     wp_nonce_field('conv_guardar_datos', 'conv_datos_nonce');
     $descripcion = get_post_meta($post->ID, '_conv_descripcion', true);
     $enlace = get_post_meta($post->ID, '_conv_enlace', true);
+    $fecha = get_post_meta($post->ID, '_conv_fecha', true);
     ?>
     <p><label><strong>Descripción</strong></label><br>
     <textarea style="width:100%;height:100px;" name="conv_descripcion"><?php echo esc_textarea($descripcion); ?></textarea></p>
 
     <p><label><strong>Enlace de "Ver detalles"</strong> (URL completa, opcional)</label><br>
     <input type="text" style="width:100%;" name="conv_enlace" value="<?php echo esc_attr($enlace); ?>" placeholder="https://cesmeca.mx/..." /></p>
+    <p><label><strong>Fecha</strong> (opcional, ej. Febrero de 2013)</label><br>
+    <input type="text" style="width:100%;" name="conv_fecha" value="<?php echo esc_attr($fecha); ?>" placeholder="Febrero de 2013" /></p>
 
     <p style="color:#888;">Usa "Imagen destacada" (panel derecho) para la imagen de la tarjeta.</p>
     <?php
@@ -3065,47 +2964,47 @@ function conv_guardar_metabox($post_id) {
     if (isset($_POST['conv_enlace'])) {
         update_post_meta($post_id, '_conv_enlace', esc_url_raw(trim($_POST['conv_enlace'])));
     }
+    if (isset($_POST["conv_fecha"])) {
+        update_post_meta($post_id, "_conv_fecha", sanitize_text_field($_POST["conv_fecha"]));
+    }
 }
 add_action('save_post', 'conv_guardar_metabox');
 
 function conv_shortcode_render() {
+    wp_enqueue_style('cesmeca-shared');
     $query = new WP_Query(array(
         'post_type' => 'convenio',
         'posts_per_page' => -1,
         'orderby' => 'menu_order title',
         'order' => 'ASC',
     ));
-
     ob_start();
     ?>
-    <style>
-    .conv-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:24px;margin-top:8px}
-    .conv-card{background:#fff;border:1px solid #e5e5e5;border-radius:8px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.06);transition:transform .2s,box-shadow .2s;display:flex;flex-direction:column}
-    .conv-card:hover{transform:translateY(-4px);box-shadow:0 6px 20px rgba(0,0,0,.12)}
-    .conv-card img{width:100%;height:180px;object-fit:cover;display:block}
-    .conv-card-body{padding:16px;flex:1;display:flex;flex-direction:column}
-    .conv-card-body h3{font-size:.95rem;font-weight:700;color:#1a1a2e;margin:0 0 10px;line-height:1.4}
-    .conv-card-body p{font-size:.85rem;color:#555;line-height:1.6;flex:1;margin-bottom:14px}
-    .conv-card-body a{display:inline-block;padding:7px 16px;background:#1a6fa8;color:#fff;border-radius:4px;font-size:.85rem;text-decoration:none;transition:background .2s}
-    .conv-card-body a:hover{background:#145a88}
-    @media(max-width:600px){.conv-grid{grid-template-columns:1fr}}
-    </style>
-    <div class="conv-grid">
+    <div class="cesmeca-grid" style="grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));">
         <?php if ($query->have_posts()) : while ($query->have_posts()) : $query->the_post(); ?>
             <?php
             $descripcion = get_post_meta(get_the_ID(), '_conv_descripcion', true);
             $enlace = get_post_meta(get_the_ID(), '_conv_enlace', true);
+            $fecha = get_post_meta(get_the_ID(), '_conv_fecha', true);
             ?>
-            <div class="conv-card">
+            <div class="cesmeca-card-media">
                 <?php if (has_post_thumbnail()) : ?>
                     <img src="<?php echo esc_url(get_the_post_thumbnail_url(get_the_ID(), 'medium')); ?>" alt="<?php the_title_attribute(); ?>">
+                    <span class="cesmeca-card-media-badge">Convenio</span>
                 <?php endif; ?>
-                <div class="conv-card-body">
+                <div class="cesmeca-card-media-body">
                     <h3><?php the_title(); ?></h3>
                     <p><?php echo esc_html($descripcion); ?></p>
-                    <?php if (!empty($enlace)) : ?>
-                        <a href="<?php echo esc_url($enlace); ?>">Ver detalles</a>
-                    <?php endif; ?>
+                    <div class="cesmeca-card-media-footer">
+                        <?php if (!empty($fecha)) : ?>
+                            <span class="cesmeca-card-media-fecha"><?php echo esc_html($fecha); ?></span>
+                        <?php else: ?>
+                            <span></span>
+                        <?php endif; ?>
+                        <?php if (!empty($enlace)) : ?>
+                            <a class="cesmeca-btn" href="<?php echo esc_url($enlace); ?>">Ver detalles</a>
+                        <?php endif; ?>
+                    </div>
                 </div>
             </div>
         <?php endwhile; wp_reset_postdata(); endif; ?>
@@ -3169,6 +3068,7 @@ add_action('init', 'posg_crear_terminos_default', 20);
 
 // Shortcode [posgrado_tabs programa="mcsh" titulo="Maestría en..." imagen="/ruta/..."]
 function posg_tabs_shortcode($atts) {
+    wp_enqueue_style('cesmeca-shared');
     $atts = shortcode_atts(array(
         'programa' => '',
         'titulo' => '',
@@ -3200,45 +3100,31 @@ function posg_tabs_shortcode($atts) {
     $uid = 'posg_' . uniqid();
     ob_start();
     ?>
-    <div class="posg-wrap" id="<?php echo esc_attr($uid); ?>">
-      <div class="posg-header">
-        <div class="posg-header-text"><h1 style="margin:0;color:#162959;font-size:2em;font-family:'Lora',serif;letter-spacing:0.01em;"><?php echo esc_html($atts['titulo'] ?: get_the_title()); ?></h1></div>
-        <div class="posg-header-img"><img src="<?php echo esc_url($atts['imagen']); ?>" alt="<?php echo esc_attr($atts['titulo']); ?>"></div>
+    <div class="cesmeca-wrap" id="<?php echo esc_attr($uid); ?>">
+      <div class="cesmeca-header">
+        <div class="cesmeca-header-text"><h1><?php echo esc_html($atts['titulo'] ?: get_the_title()); ?></h1></div>
+        <div class="cesmeca-header-img"><img src="<?php echo esc_url($atts['imagen']); ?>" alt="<?php echo esc_attr($atts['titulo']); ?>"></div>
       </div>
-      <div class="posg-tabs-wrapper">
-        <div class="posg-tabs-nav">
+      <div class="cesmeca-tabs-vertical-wrapper">
+        <div class="cesmeca-tabs-vertical-nav">
           <?php $i = 0; while ($query->have_posts()) : $query->the_post(); ?>
-            <button class="posg-tab-btn<?php echo $i === 0 ? ' active' : ''; ?>" data-tab="<?php echo esc_attr($uid . '_' . $i); ?>"><?php the_title(); ?></button>
+            <button class="cesmeca-tab-btn<?php echo $i === 0 ? ' active' : ''; ?>" data-tab="<?php echo esc_attr($uid . '_' . $i); ?>"><?php the_title(); ?></button>
           <?php $i++; endwhile; ?>
         </div>
         <?php $query->rewind_posts(); $i = 0; while ($query->have_posts()) : $query->the_post(); ?>
-          <div class="posg-tab-panel<?php echo $i === 0 ? ' active' : ''; ?>" data-panel="<?php echo esc_attr($uid . '_' . $i); ?>">
+          <div class="cesmeca-tab-panel<?php echo $i === 0 ? ' active' : ''; ?>" data-panel="<?php echo esc_attr($uid . '_' . $i); ?>">
             <?php the_content(); ?>
           </div>
         <?php $i++; endwhile; wp_reset_postdata(); ?>
       </div>
     </div>
-    <style>
-    .posg-wrap{max-width:1200px;margin:0 auto}
-    .posg-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;flex-wrap:wrap;gap:16px}
-    .posg-header-img img{max-height:90px}
-    .posg-tabs-wrapper{display:flex;gap:24px;align-items:flex-start;flex-wrap:wrap}
-    .posg-tabs-nav{display:flex;flex-direction:column;gap:2px;flex:0 0 260px}
-    .posg-tab-btn{text-align:left;padding:12px 16px;background:#f4f6f9;border:none;border-radius:4px;cursor:pointer;font-size:.92rem;font-weight:600;color:#1a1a2e}
-    .posg-tab-btn:hover{background:#e4ecf6}
-    .posg-tab-btn.active{background:#3d7cc9;color:#fff}
-    .posg-tab-panel{display:none;flex:1;min-width:280px;padding:20px 28px 8px 12px;font-size:.95rem;line-height:1.7;text-align:justify;color:#333}
-    .posg-tab-panel.active{display:block}
-    .posg-tab-panel p{margin-bottom:14px}
-    @media(max-width:900px){.posg-tabs-nav{flex:1 1 100%}}
-    </style>
     <script>
     (function(){
       var wrap = document.getElementById('<?php echo esc_js($uid); ?>');
-      wrap.querySelectorAll('.posg-tab-btn').forEach(function(btn){
+      wrap.querySelectorAll('.cesmeca-tab-btn').forEach(function(btn){
         btn.addEventListener('click', function(){
-          wrap.querySelectorAll('.posg-tab-btn').forEach(function(b){b.classList.remove('active')});
-          wrap.querySelectorAll('.posg-tab-panel').forEach(function(p){p.classList.remove('active')});
+          wrap.querySelectorAll('.cesmeca-tab-btn').forEach(function(b){b.classList.remove('active')});
+          wrap.querySelectorAll('.cesmeca-tab-panel').forEach(function(p){p.classList.remove('active')});
           btn.classList.add('active');
           wrap.querySelector('[data-panel="'+btn.getAttribute('data-tab')+'"]').classList.add('active');
         });
@@ -3293,7 +3179,7 @@ add_action('pre_get_posts', 'posg_admin_orden_defecto');
    ============================================================ */
 
 function cesmeca_shared_styles() {
-    wp_register_style(
+    wp_enqueue_style(
         'cesmeca-shared',
         get_stylesheet_directory_uri() . '/cesmeca-shared.css',
         array(),
@@ -3301,3 +3187,4 @@ function cesmeca_shared_styles() {
     );
 }
 add_action('wp_enqueue_scripts', 'cesmeca_shared_styles');
+function cesmeca_shared_scripts() { wp_enqueue_script('cesmeca-lightbox', get_stylesheet_directory_uri() . '/cesmeca-lightbox.js', array(), filemtime(get_stylesheet_directory() . '/cesmeca-lightbox.js'), true); } add_action('wp_enqueue_scripts', 'cesmeca_shared_scripts');

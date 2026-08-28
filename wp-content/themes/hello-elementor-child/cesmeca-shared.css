@@ -147,20 +147,20 @@
    COMPONENTE: Botón (.cesmeca-btn)
    ============================================================ */
 .cesmeca-btn {
-  display: inline-block;
-  padding: 7px 16px;
-  background: var(--cesmeca-azul-700);
-  color: var(--cesmeca-blanco);
-  border-radius: var(--cesmeca-radius-sm);
-  font-size: var(--cesmeca-text-sm);
-  text-decoration: none;
-  transition: background var(--cesmeca-transition);
+  display: inline-block !important;
+  padding: 7px 16px !important;
+  background: var(--cesmeca-azul-700) !important;
+  color: var(--cesmeca-blanco) !important;
+  border-radius: var(--cesmeca-radius-sm) !important;
+  font-size: var(--cesmeca-text-sm) !important;
+  text-decoration: none !important;
+  transition: background var(--cesmeca-transition) !important;
 }
 
 .cesmeca-btn:hover,
 .cesmeca-btn:focus-visible {
-  background: var(--cesmeca-azul-900);
-  color: var(--cesmeca-blanco);
+  background: var(--cesmeca-azul-500) !important;
+  color: var(--cesmeca-blanco) !important;
 }
 
 /* ============================================================
@@ -221,6 +221,9 @@
   gap: var(--cesmeca-space-5);
   align-items: flex-start;
   flex-wrap: wrap;
+  border: 1px solid var(--cesmeca-gris-200);
+  border-radius: 8px;
+  padding: var(--cesmeca-space-5);
 }
 
 .cesmeca-tabs-vertical-nav {
@@ -385,3 +388,233 @@
 .cesmeca-integrantes ul li a:hover { text-decoration: underline; }
 
 .cesmeca-integrantes ul li span { color: var(--cesmeca-gris-600); }
+
+
+/* Variante: integrantes con separador (cuando hay descripción antes) */
+.cesmeca-integrantes--separado h4 {
+  margin-top: var(--cesmeca-space-3);
+  border-top: 1px solid var(--cesmeca-gris-300);
+  padding-top: var(--cesmeca-space-3);
+}
+
+
+/* ============================================================
+   COMPONENTE: Tabla (dentro de acordeón u otros contextos)
+   ============================================================ */
+.cesmeca-table { width: 100%; border-collapse: collapse; }
+.cesmeca-table th {
+  background: var(--cesmeca-gris-100);
+  padding: var(--cesmeca-space-3) var(--cesmeca-space-4);
+  text-align: left;
+  font-size: var(--cesmeca-text-sm);
+  color: var(--cesmeca-gris-600);
+  border-bottom: 1px solid var(--cesmeca-gris-300);
+  font-weight: 700;
+}
+.cesmeca-table td {
+  padding: 14px var(--cesmeca-space-4);
+  border-bottom: 1px solid #f0f0f0;
+  font-size: var(--cesmeca-text-sm);
+  color: #444444;
+  vertical-align: top;
+}
+.cesmeca-table td:first-child { width: 25%; color: var(--cesmeca-gris-400); }
+.cesmeca-table tr:last-child td { border-bottom: none; }
+.cesmeca-table td a { color: var(--cesmeca-azul-700); text-decoration: none; }
+.cesmeca-table td a:hover { text-decoration: underline; }
+
+.cesmeca-nota {
+  padding: var(--cesmeca-space-4) var(--cesmeca-space-5);
+  font-size: 12px;
+  color: var(--cesmeca-gris-400);
+  font-style: italic;
+}
+
+
+/* Tipografía dentro de tarjeta con imagen */
+.cesmeca-card-media-body h3 {
+  font-size: .95rem;
+  font-weight: 700;
+  color: var(--cesmeca-azul-900);
+  margin: 0 0 10px;
+  line-height: 1.4;
+}
+.cesmeca-card-media-body p {
+  font-size: .85rem;
+  color: var(--cesmeca-gris-600);
+  line-height: 1.6;
+  flex: 1;
+  margin-bottom: 14px;
+}
+
+
+/* ============================================================
+   COMPONENTE: Encabezado con título + imagen (Posgrados)
+   ============================================================ */
+.cesmeca-wrap { max-width: 1200px; margin: 0 auto; }
+.cesmeca-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--cesmeca-space-5);
+  flex-wrap: wrap;
+  gap: var(--cesmeca-space-4);
+}
+.cesmeca-header h1 {
+  margin: 0;
+  color: var(--cesmeca-azul-900);
+  font-size: 2em;
+  font-family: "Lora", serif;
+  letter-spacing: 0.01em;
+}
+.cesmeca-header-img img { max-height: 90px; }
+
+
+/* ============================================================
+   Sobrescribe el color de enlace por defecto del tema (rosa/magenta)
+   dentro de nuestros componentes, usando el azul institucional.
+   ============================================================ */
+.cesmeca-wrap a,
+.cesmeca-card a,
+.cesmeca-tab-panel a,
+.cesmeca-accordion-body a {
+  color: var(--cesmeca-azul-700);
+}
+.cesmeca-wrap a:hover,
+.cesmeca-card a:hover,
+.cesmeca-tab-panel a:hover,
+.cesmeca-accordion-body a:hover {
+  color: var(--cesmeca-azul-500);
+}
+
+
+/* ============================================================
+   COMPONENTE: Pestañas CSS-only (sin JS, radio buttons ocultos)
+   Reemplaza .rev-css-tabs, .eac-css-tabs
+   ============================================================ */
+.cesmeca-css-tabs {
+  position: relative;
+  border: 1px solid var(--cesmeca-gris-200);
+  border-radius: 8px;
+  padding: var(--cesmeca-space-5);
+  margin-top: var(--cesmeca-space-5);
+  box-shadow: var(--cesmeca-shadow);
+}
+.cesmeca-css-tabs input[type="radio"] {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+.cesmeca-css-tabs label {
+  display: inline-block;
+  padding: var(--cesmeca-space-2) var(--cesmeca-space-4);
+  margin-right: var(--cesmeca-space-1);
+  margin-bottom: var(--cesmeca-space-5);
+  background: var(--cesmeca-azul-400);
+  color: var(--cesmeca-blanco);
+  border-radius: var(--cesmeca-radius-sm) var(--cesmeca-radius-sm) 0 0;
+  cursor: pointer;
+  font-size: .9rem;
+  transition: background var(--cesmeca-transition);
+}
+.cesmeca-css-tabs input[type="radio"]:checked + label {
+  background: var(--cesmeca-azul-500);
+  font-weight: 600;
+}
+.cesmeca-css-panel { display: none; }
+
+
+/* ============================================================
+   COMPONENTE: Lightbox reutilizable (clic para ampliar imagen)
+   ============================================================ */
+img.cesmeca-zoom { cursor: zoom-in; }
+.cesmeca-lightbox-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.9);
+  z-index: 99999;
+  align-items: center;
+  justify-content: center;
+}
+.cesmeca-lightbox-overlay.open { display: flex; }
+.cesmeca-lightbox-overlay img {
+  max-width: 90vw;
+  max-height: 88vh;
+  border-radius: 4px;
+}
+.cesmeca-lightbox-close {
+  position: absolute;
+  top: 20px;
+  right: 30px;
+  color: #fff;
+  font-size: 2.2rem;
+  cursor: pointer;
+  background: none;
+  border: none;
+  line-height: 1;
+}
+
+
+/* Navegación anterior/siguiente del lightbox */
+.cesmeca-lightbox-prev,
+.cesmeca-lightbox-next {
+  position: fixed;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255,255,255,.15);
+  border: none;
+  color: #fff;
+  font-size: 2rem;
+  padding: 12px 18px;
+  cursor: pointer;
+  border-radius: 4px;
+  z-index: 100000;
+}
+.cesmeca-lightbox-prev:hover,
+.cesmeca-lightbox-next:hover { background: rgba(255,255,255,.3); }
+.cesmeca-lightbox-prev { left: 16px; }
+.cesmeca-lightbox-next { right: 16px; }
+
+
+/* ============================================================
+   Corrige el color de enlace por defecto del tema en TODA
+   la página, para las páginas migradas al sistema compartido.
+   ============================================================ */
+.page-id-1699 a:not(.cesmeca-btn), .page-id-1700 a:not(.cesmeca-btn), .page-id-1697 a:not(.cesmeca-btn),
+.page-id-1576 a:not(.cesmeca-btn), .page-id-1578 a:not(.cesmeca-btn), .page-id-1580 a:not(.cesmeca-btn), .page-id-1704 a:not(.cesmeca-btn),
+.page-id-1707 a:not(.cesmeca-btn), .page-id-1708 a:not(.cesmeca-btn), .page-id-1705 a:not(.cesmeca-btn), .page-id-1706 a:not(.cesmeca-btn) {
+  color: var(--cesmeca-azul-700);
+}
+.page-id-1699 a:hover, .page-id-1700 a:hover, .page-id-1697 a:hover,
+.page-id-1576 a:hover, .page-id-1578 a:hover, .page-id-1580 a:hover, .page-id-1704 a:hover,
+.page-id-1707 a:hover, .page-id-1708 a:hover, .page-id-1705 a:hover, .page-id-1706 a:hover {
+  color: var(--cesmeca-azul-500);
+}
+
+
+/* Badge sobre la imagen de tarjeta + fecha (estilo Consejo Académico) */
+.cesmeca-card-media { position: relative; }
+.cesmeca-card-media-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: var(--cesmeca-azul-700);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 5px 12px;
+  border-radius: 20px;
+  letter-spacing: 0.5px;
+}
+.cesmeca-card-media-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: auto;
+}
+.cesmeca-card-media-fecha {
+  font-size: 12px;
+  color: var(--cesmeca-gris-400);
+}
