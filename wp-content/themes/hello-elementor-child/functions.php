@@ -2161,80 +2161,16 @@ add_action('save_post', 'ca_guardar_metabox');
 
 // 4. Shortcode [cuerpos_academicos]
 function ca_shortcode_render() {
+    wp_enqueue_style('cesmeca-shared');
     $query = new WP_Query(array(
         'post_type' => 'cuerpo_academico',
         'posts_per_page' => -1,
         'orderby' => 'menu_order title',
         'order' => 'ASC',
     ));
-
     ob_start();
     ?>
-    <style>
-    .ca-grid {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 20px;
-        margin: 20px 0;
-    }
-    .ca-card {
-        background: #f8f9fa;
-        border: 1px solid #dee2e6;
-        border-left: 4px solid #1a5276;
-        border-radius: 6px;
-        padding: 20px;
-    }
-    .ca-card h3 {
-        color: #1a5276;
-        font-size: 16px;
-        margin: 0 0 12px 0;
-        line-height: 1.3;
-    }
-    .ca-nivel {
-        font-size: 11px;
-        font-weight: 700;
-        text-transform: uppercase;
-        color: #fff;
-        background: #1a5276;
-        display: inline-block;
-        padding: 3px 10px;
-        border-radius: 20px;
-        margin-bottom: 12px;
-        letter-spacing: 0.5px;
-    }
-    .ca-nivel.formacion { background: #e67e22; }
-    .ca-nivel.consolidacion { background: #27ae60; }
-    .ca-nivel.consolidacion-proceso { background: #8e44ad; }
-    .ca-integrantes h4 {
-        font-size: 11px;
-        font-weight: 700;
-        text-transform: uppercase;
-        color: #666;
-        margin: 0 0 8px 0;
-        letter-spacing: 0.5px;
-    }
-    .ca-integrantes ul {
-        margin: 0;
-        padding: 0;
-        list-style: none;
-    }
-    .ca-integrantes ul li {
-        font-size: 14px;
-        padding: 4px 0;
-        border-bottom: 1px solid #e9ecef;
-    }
-    .ca-integrantes ul li:last-child { border-bottom: none; }
-    .ca-integrantes ul li a {
-        color: #1a5276;
-        text-decoration: none;
-    }
-    .ca-integrantes ul li a:hover { text-decoration: underline; }
-    .ca-integrantes ul li span { color: #444; }
-    @media (max-width: 640px) {
-        .ca-grid { grid-template-columns: 1fr; }
-    }
-    </style>
-    <div class="ca-grid">
+    <div class="cesmeca-grid">
         <?php if ($query->have_posts()) : while ($query->have_posts()) : $query->the_post(); ?>
             <?php
             $terms = get_the_terms(get_the_ID(), 'ca_estado');
@@ -2244,24 +2180,23 @@ function ca_shortcode_render() {
                 $estado_slug = $terms[0]->slug;
                 $estado_nombre = $terms[0]->name;
             }
-            $clase_nivel = 'ca-nivel';
+            $clase_nivel = 'cesmeca-badge';
             if ($estado_slug === 'en-formacion') {
-                $clase_nivel .= ' formacion';
+                $clase_nivel .= ' cesmeca-badge--alerta';
             } elseif ($estado_slug === 'consolidado') {
-                $clase_nivel .= ' consolidacion';
+                $clase_nivel .= ' cesmeca-badge--exito';
             } elseif ($estado_slug === 'en-consolidacion') {
-                $clase_nivel .= ' consolidacion-proceso';
+                $clase_nivel .= ' cesmeca-badge--info';
             }
-
             $integrantes = get_post_meta(get_the_ID(), '_ca_integrantes_data', true);
             if (!is_array($integrantes)) {
                 $integrantes = array();
             }
             ?>
-            <div class="ca-card">
+            <div class="cesmeca-card">
                 <h3><?php the_title(); ?></h3>
                 <p><span class="<?php echo esc_attr($clase_nivel); ?>"><?php echo esc_html($estado_nombre); ?></span></p>
-                <div class="ca-integrantes">
+                <div class="cesmeca-integrantes">
                     <h4>Integrantes</h4>
                     <ul>
                         <?php foreach ($integrantes as $row) : ?>
@@ -3353,3 +3288,16 @@ function posg_admin_orden_defecto($query) {
     }
 }
 add_action('pre_get_posts', 'posg_admin_orden_defecto');
+/* ============================================================
+   CESMECA - Registro de la hoja de estilos compartida
+   ============================================================ */
+
+function cesmeca_shared_styles() {
+    wp_register_style(
+        'cesmeca-shared',
+        get_stylesheet_directory_uri() . '/cesmeca-shared.css',
+        array(),
+        filemtime(get_stylesheet_directory() . '/cesmeca-shared.css')
+    );
+}
+add_action('wp_enqueue_scripts', 'cesmeca_shared_styles');

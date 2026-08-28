@@ -1,0 +1,387 @@
+/* ============================================================
+   CESMECA - Sistema de diseño compartido
+   Paleta basada en los colores institucionales reales del sitio
+   (azul de menú activo #3498db, azul de marca #1a5276)
+   ============================================================ */
+
+:root {
+  /* Color */
+  --cesmeca-azul-900: #1a1a2e;
+  --cesmeca-azul-700: #1a5276;
+  --cesmeca-azul-500: #3498db;
+  --cesmeca-azul-400: #5dade2;
+  --cesmeca-azul-100: #eaf2fb;
+
+  --cesmeca-gris-900: #1a1a2e;
+  --cesmeca-gris-600: #555555;
+  --cesmeca-gris-400: #888888;
+  --cesmeca-gris-300: #dee2e6;
+  --cesmeca-gris-200: #e5e5e5;
+  --cesmeca-gris-100: #f8f9fa;
+  --cesmeca-blanco: #ffffff;
+
+  --cesmeca-exito: #27ae60;
+  --cesmeca-alerta: #e67e22;
+  --cesmeca-info: #8e44ad;
+
+  /* Espaciado */
+  --cesmeca-space-1: 4px;
+  --cesmeca-space-2: 8px;
+  --cesmeca-space-3: 12px;
+  --cesmeca-space-4: 16px;
+  --cesmeca-space-5: 24px;
+  --cesmeca-space-6: 32px;
+
+  /* Tipografía */
+  --cesmeca-text-sm: 13px;
+  --cesmeca-text-base: 15px;
+  --cesmeca-text-md: 16px;
+  --cesmeca-text-lg: 20px;
+  --cesmeca-line-height: 1.7;
+
+  /* Bordes y sombras */
+  --cesmeca-radius: 6px;
+  --cesmeca-radius-sm: 4px;
+  --cesmeca-shadow: 0 2px 8px rgba(0,0,0,.08);
+  --cesmeca-shadow-hover: 0 6px 16px rgba(0,0,0,.12);
+  --cesmeca-transition: 200ms ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --cesmeca-transition: 0ms;
+  }
+}
+
+/* ============================================================
+   COMPONENTE: Tarjeta (.cesmeca-card)
+   Reemplaza .ca-card, .li-card, .conv-card
+   ============================================================ */
+.cesmeca-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--cesmeca-space-5);
+  margin: var(--cesmeca-space-5) 0;
+}
+
+.cesmeca-card {
+  background: var(--cesmeca-gris-100);
+  border: 1px solid var(--cesmeca-gris-300);
+  border-left: 4px solid var(--cesmeca-azul-700);
+  border-radius: var(--cesmeca-radius);
+  padding: var(--cesmeca-space-5);
+  transition: transform var(--cesmeca-transition), box-shadow var(--cesmeca-transition);
+}
+
+.cesmeca-card:hover {
+  box-shadow: var(--cesmeca-shadow);
+}
+
+.cesmeca-card h3 {
+  color: var(--cesmeca-azul-700);
+  font-size: var(--cesmeca-text-md);
+  margin: 0 0 var(--cesmeca-space-3) 0;
+  line-height: 1.3;
+}
+
+.cesmeca-card p {
+  font-size: var(--cesmeca-text-sm);
+  color: var(--cesmeca-gris-600);
+  line-height: 1.6;
+}
+
+/* Variante: tarjeta con imagen (para Convenios) */
+.cesmeca-card-media {
+  background: var(--cesmeca-blanco);
+  border: 1px solid var(--cesmeca-gris-200);
+  border-left: none;
+  border-radius: var(--cesmeca-radius);
+  overflow: hidden;
+  box-shadow: var(--cesmeca-shadow);
+  transition: transform var(--cesmeca-transition), box-shadow var(--cesmeca-transition);
+  display: flex;
+  flex-direction: column;
+}
+
+.cesmeca-card-media:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--cesmeca-shadow-hover);
+}
+
+.cesmeca-card-media img {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  display: block;
+}
+
+.cesmeca-card-media-body {
+  padding: var(--cesmeca-space-4);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ============================================================
+   COMPONENTE: Badge (.cesmeca-badge)
+   Reemplaza .ca-nivel
+   ============================================================ */
+.cesmeca-badge {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--cesmeca-blanco);
+  background: var(--cesmeca-azul-700);
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 20px;
+  margin-bottom: var(--cesmeca-space-3);
+  letter-spacing: 0.5px;
+}
+
+.cesmeca-badge--exito { background: var(--cesmeca-exito); }
+.cesmeca-badge--alerta { background: var(--cesmeca-alerta); }
+.cesmeca-badge--info { background: var(--cesmeca-info); }
+
+/* ============================================================
+   COMPONENTE: Botón (.cesmeca-btn)
+   ============================================================ */
+.cesmeca-btn {
+  display: inline-block;
+  padding: 7px 16px;
+  background: var(--cesmeca-azul-700);
+  color: var(--cesmeca-blanco);
+  border-radius: var(--cesmeca-radius-sm);
+  font-size: var(--cesmeca-text-sm);
+  text-decoration: none;
+  transition: background var(--cesmeca-transition);
+}
+
+.cesmeca-btn:hover,
+.cesmeca-btn:focus-visible {
+  background: var(--cesmeca-azul-900);
+  color: var(--cesmeca-blanco);
+}
+
+/* ============================================================
+   COMPONENTE: Pestañas horizontales (.cesmeca-tabs)
+   Reemplaza .proy-*, .rev-css-tabs, .eac-css-tabs
+   ============================================================ */
+.cesmeca-tabs {
+  border: 1px solid var(--cesmeca-gris-200);
+  border-radius: 8px;
+  padding: var(--cesmeca-space-5);
+  margin-top: var(--cesmeca-space-5);
+  box-shadow: var(--cesmeca-shadow);
+}
+
+.cesmeca-tab-btn {
+  display: inline-block;
+  padding: var(--cesmeca-space-2) var(--cesmeca-space-4);
+  margin-right: var(--cesmeca-space-1);
+  margin-bottom: var(--cesmeca-space-5);
+  background: var(--cesmeca-azul-400);
+  color: var(--cesmeca-blanco);
+  border: none;
+  border-radius: var(--cesmeca-radius-sm) var(--cesmeca-radius-sm) 0 0;
+  cursor: pointer;
+  font-size: .9rem;
+  transition: background var(--cesmeca-transition);
+}
+
+.cesmeca-tab-btn:hover {
+  background: var(--cesmeca-azul-500);
+}
+
+.cesmeca-tab-btn:focus-visible {
+  outline: 2px solid var(--cesmeca-azul-900);
+  outline-offset: 2px;
+}
+
+.cesmeca-tab-btn.active,
+.cesmeca-tab-btn[aria-selected="true"] {
+  background: var(--cesmeca-azul-500);
+  font-weight: 600;
+}
+
+.cesmeca-tab-panel {
+  display: none;
+}
+
+.cesmeca-tab-panel.active {
+  display: block;
+}
+
+/* ============================================================
+   COMPONENTE: Pestañas verticales / menú lateral (.cesmeca-tabs-vertical)
+   Reemplaza .posg-*
+   ============================================================ */
+.cesmeca-tabs-vertical-wrapper {
+  display: flex;
+  gap: var(--cesmeca-space-5);
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.cesmeca-tabs-vertical-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 0 0 260px;
+}
+
+.cesmeca-tabs-vertical-nav .cesmeca-tab-btn {
+  text-align: left;
+  background: var(--cesmeca-gris-100);
+  color: var(--cesmeca-gris-900);
+  border-radius: var(--cesmeca-radius-sm);
+  font-weight: 600;
+  margin-right: 0;
+  margin-bottom: 2px;
+  padding: var(--cesmeca-space-3) var(--cesmeca-space-4);
+}
+
+.cesmeca-tabs-vertical-nav .cesmeca-tab-btn:hover {
+  background: var(--cesmeca-azul-100);
+}
+
+.cesmeca-tabs-vertical-nav .cesmeca-tab-btn.active {
+  background: var(--cesmeca-azul-500);
+  color: var(--cesmeca-blanco);
+}
+
+.cesmeca-tabs-vertical-wrapper .cesmeca-tab-panel {
+  flex: 1;
+  min-width: 280px;
+  padding: var(--cesmeca-space-5) var(--cesmeca-space-6) var(--cesmeca-space-2) var(--cesmeca-space-3);
+  font-size: var(--cesmeca-text-base);
+  line-height: var(--cesmeca-line-height);
+  text-align: justify;
+  color: var(--cesmeca-gris-600);
+}
+
+.cesmeca-tabs-vertical-wrapper .cesmeca-tab-panel p {
+  margin-bottom: var(--cesmeca-space-4);
+}
+
+@media (max-width: 900px) {
+  .cesmeca-tabs-vertical-nav {
+    flex: 1 1 100%;
+  }
+}
+
+/* ============================================================
+   COMPONENTE: Acordeón (.cesmeca-accordion)
+   Reemplaza .proy-seccion / .proy-header / .proy-body
+   ============================================================ */
+.cesmeca-accordion-seccion {
+  margin-bottom: var(--cesmeca-space-4);
+  border: 1px solid var(--cesmeca-gris-300);
+  border-radius: var(--cesmeca-radius);
+  overflow: hidden;
+}
+
+.cesmeca-accordion-header {
+  background: var(--cesmeca-gris-100);
+  padding: var(--cesmeca-space-4) var(--cesmeca-space-5);
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: var(--cesmeca-azul-700);
+  font-weight: 600;
+  font-size: var(--cesmeca-text-md);
+  user-select: none;
+  transition: background var(--cesmeca-transition);
+}
+
+.cesmeca-accordion-header:hover {
+  background: var(--cesmeca-azul-100);
+}
+
+.cesmeca-accordion-header:focus-visible {
+  outline: 2px solid var(--cesmeca-azul-500);
+  outline-offset: -2px;
+}
+
+.cesmeca-accordion-header .arrow {
+  transition: transform var(--cesmeca-transition);
+  font-size: 12px;
+}
+
+.cesmeca-accordion-header.open .arrow {
+  transform: rotate(90deg);
+}
+
+.cesmeca-accordion-body {
+  display: none;
+}
+
+.cesmeca-accordion-body.open {
+  display: block;
+}
+
+/* ============================================================
+   COMPONENTE: Galería de imágenes (.cesmeca-gallery)
+   Reemplaza .rev-css-gallery, .eac-css-gallery
+   ============================================================ */
+.cesmeca-gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: var(--cesmeca-space-4);
+}
+
+.cesmeca-gallery img {
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
+  border-radius: var(--cesmeca-radius);
+  box-shadow: var(--cesmeca-shadow);
+  display: block;
+  transition: transform var(--cesmeca-transition);
+}
+
+.cesmeca-gallery img:hover {
+  transform: scale(1.03);
+}
+
+@media (max-width: 640px) {
+  .cesmeca-grid { grid-template-columns: 1fr; }
+  .cesmeca-gallery { grid-template-columns: repeat(2, 1fr); }
+}
+
+
+/* ============================================================
+   COMPONENTE: Lista de integrantes dentro de tarjeta
+   ============================================================ */
+.cesmeca-integrantes h4 {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--cesmeca-gris-400);
+  margin: 0 0 var(--cesmeca-space-2) 0;
+  letter-spacing: 0.5px;
+}
+
+.cesmeca-integrantes ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cesmeca-integrantes ul li {
+  font-size: 14px;
+  padding: var(--cesmeca-space-1) 0;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.cesmeca-integrantes ul li:last-child { border-bottom: none; }
+
+.cesmeca-integrantes ul li a {
+  color: var(--cesmeca-azul-700);
+  text-decoration: none;
+}
+
+.cesmeca-integrantes ul li a:hover { text-decoration: underline; }
+
+.cesmeca-integrantes ul li span { color: var(--cesmeca-gris-600); }
